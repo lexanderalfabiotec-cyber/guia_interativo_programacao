@@ -30,6 +30,8 @@ xdg-open laboratorio-rust.html
 
 Capítulos concluídos, respostas dos quizzes, placar do treino, tema e linguagem ficam salvos automaticamente no `localStorage` do navegador, com prefixo `labrs:`. O ponto da leitura fica em `labrs:reading` e é restaurado ao reabrir sem uma âncora no endereço. Os dados permanecem após reiniciar o navegador; um aviso aparece no índice se o armazenamento estiver indisponível. Consulte [onde os dados ficam salvos e como consultá-los](../../README.md#onde-o-progresso-fica-salvo).
 
+Ao rolar para baixo até o final de um capítulo aparecer na tela, ele é marcado como concluído automaticamente. Você também pode marcar ou desmarcar a caixa "Já estudei este capítulo" manualmente.
+
 O guia está dividido em 6 partes e 35 capítulos práticos. A Parte A cobre todos os 23 temas do [Guia Completo de Rust](Guia%20Completo%20de%20Rust.md), com explicações descontraídas, exemplos, comparações com Python e quizzes. Os exemplos comparativos que já existiam continuam disponíveis em caixas expansíveis nos respectivos capítulos.
 
 - **Parte A · Base da linguagem**

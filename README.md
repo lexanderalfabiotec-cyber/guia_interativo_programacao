@@ -151,6 +151,8 @@ Os dois HTMLs salvam automaticamente no **`localStorage` do perfil do navegador*
 
 Ao reabrir o guia sem uma âncora (`#capitulo`) no endereço, ele retoma o ponto salvo. Links para um capítulo específico têm prioridade. As marcações e respostas são salvas imediatamente; a posição é salva durante a rolagem e ao sair da página.
 
+Ao rolar para baixo até o final de um capítulo ou módulo entrar na tela, ele é marcado automaticamente como concluído e salvo. As caixas de conclusão continuam disponíveis para marcar ou desmarcar manualmente. Abrir o guia no meio ou saltar para outro capítulo não conclui os anteriores automaticamente.
+
 Para consultar os dados, abra as ferramentas do navegador (**F12 → Application/Aplicativo → Local Storage/Armazenamento local**) e selecione o endereço do guia.
 
 Use o mesmo navegador, perfil e endereço, incluindo protocolo, domínio e porta. `localhost` e `127.0.0.1`, ou portas diferentes, têm armazenamentos separados. Para arquivos abertos diretamente (`file://`), a persistência depende do navegador e do caminho do arquivo; prefira o servidor local com endereço fixo. Limpar os dados do site apaga o progresso, e janelas anônimas descartam os dados ao encerrar. Quando o armazenamento estiver bloqueado ou cheio, o guia exibirá um aviso junto ao progresso.

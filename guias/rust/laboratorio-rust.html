@@ -483,7 +483,7 @@ fn main() {
 <details class="box"><summary>Mais exemplos Python ↔ Rust: aplicações e comparações</summary><div class="ch-body"><div class="box box-tldr"><div class="box-label">Resumo em 30 segundos</div><ul>
 <li>Python continua sendo a linguagem da pesquisa, do notebook e da orquestração. Rust entra no <strong>caminho quente</strong>: o trecho que roda milhões de vezes, que precisa de latência previsível ou que vai rodar num microcontrolador.</li>
 <li>A ponte mais usada é o <a class="gl" data-g="PyO3" href="#g-PyO3">PyO3</a> com o <a class="gl" data-g="maturin" href="#g-maturin">maturin</a>: você escreve uma função em Rust e faz <code>import</code> dela no Python como se fosse um módulo comum.</li>
-<li>Cado capítulo tem a mesma estrutura: o que é, para que serve, siglas, exemplos Python ↔ Rust, diagrama quando o fluxo não é óbvio e um quiz. Marque "Já estudei" para acompanhar o progresso no índice.</li>
+<li>Cado capítulo tem a mesma estrutura: o que é, para que serve, siglas, exemplos Python ↔ Rust, diagrama quando o fluxo não é óbvio e um quiz. Ao rolar para baixo até o final do capítulo aparecer, ele é marcado como concluído automaticamente. Você também pode marcar ou desmarcar "Já estudei" para ajustar o progresso no índice.</li>
 </ul></div>
 <div class="def-grid"><div class="def"><h4>O que é</h4>Rust é uma linguagem compilada, com tipagem estática e sem coletor de lixo. A memória é gerenciada por regras de <a class="gl" data-g="ownership" href="#g-ownership">ownership</a> checadas na compilação, então o binário final não tem pausas de <a class="gl" data-g="GC" href="#g-GC">GC</a> e não tem a classe de bugs de memória comum em C e C++.</div><div class="def"><h4>Para que serve</h4>escrever código rápido e seguro onde Python sofre: laços numéricos pesados, serviços com muitas conexões, parsers, ferramentas de linha de comando e firmware. Junto com Python, serve para acelerar só a parte crítica sem reescrever o sistema inteiro.</div></div>
 <div class="box box-siglas"><div class="box-label">Siglas e termos difíceis</div><dl><dt>GC</dt><dd>Garbage Collector, coletor de lixo. Libera memória em tempo de execução. Python usa contagem de referências mais um coletor de ciclos; Rust não tem nenhum dos dois.</dd><dt>GIL</dt><dd>Global Interpreter Lock. Trava do CPython que deixa só uma thread executar bytecode Python por vez.</dd><dt>FFI</dt><dd>Foreign Function Interface. Mecanismo para uma linguagem chamar funções de outra.</dd><dt>ABI</dt><dd>Application Binary Interface. O "contrato binário" de como funções são chamadas na máquina (registradores, pilha, nomes).</dd><dt>Caminho quente</dt><dd>hot path, o trecho do programa onde a maior parte do tempo é gasta.</dd><dt>Crate</dt><dd>unidade de compilação do Rust: uma biblioteca ou um executável. Equivale a um pacote.</dd></dl></div>
@@ -6337,6 +6337,7 @@ pytest tests/test_bench.py --benchmark-only  # tabela comparando as duas versõe
     setTxt("prog-n", n);
     setTxt("top-prog", `${n} de ${CHAPTERS.length} estudados`);
     const bar = $("#prog-bar"); if (bar) bar.style.width = (100 * n / Math.max(1, CHAPTERS.length)) + "%";
+    $$(".done-cb").forEach(cb => { cb.checked = !!done[cb.dataset.ch]; });
     $$(".toc-list a[data-ch]").forEach(a => a.classList.toggle("done", !!done[a.dataset.ch]));
   }
   $$(".done-cb").forEach(cb => {
@@ -6344,6 +6345,62 @@ pytest tests/test_bench.py --benchmark-only  # tabela comparando as duas versõe
     cb.addEventListener("change", () => { done[cb.dataset.ch] = cb.checked; store.set("done", done); renderProgress(); });
   });
   renderProgress();
+
+  /* ---------------- conclusão ao rolar até o final do capítulo */
+  function initAutoProgress() {
+    let previousY = window.scrollY, ticking = false;
+    let navigating = false, navigationTimer;
+    let bottoms = CHAPTERS.map(s => s.getBoundingClientRect().bottom);
+    const reset = () => {
+      previousY = window.scrollY;
+      bottoms = CHAPTERS.map(s => s.getBoundingClientRect().bottom);
+    };
+    const endNavigation = () => {
+      clearTimeout(navigationTimer);
+      if (navigating) reset();
+      navigating = false;
+    };
+    const pauseForNavigation = () => {
+      navigating = true;
+      clearTimeout(navigationTimer);
+      navigationTimer = setTimeout(endNavigation, 180);
+    };
+    function update() {
+      ticking = false;
+      if (navigating || document.hidden || matchMedia("print").matches) { reset(); return; }
+      const y = window.scrollY;
+      const viewportBottom = document.documentElement.clientHeight;
+      const viewportTop = $(".topbar").getBoundingClientRect().bottom;
+      let changed = false;
+      CHAPTERS.forEach((section, i) => {
+        const bottom = section.getBoundingClientRect().bottom;
+        // Só conclui quando o final entra na tela ao descer, sem marcar capítulos pulados.
+        if (y > previousY && bottoms[i] > viewportBottom && bottom <= viewportBottom && bottom >= viewportTop && !done[section.id]) {
+          done[section.id] = true;
+          changed = true;
+        }
+        bottoms[i] = bottom;
+      });
+      previousY = y;
+      if (changed) { store.set("done", done); renderProgress(); }
+    }
+    window.addEventListener("scroll", () => {
+      if (navigating) pauseForNavigation();
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    document.addEventListener("click", e => {
+      const link = e.target.closest("a[href]");
+      if (link && link.hash && link.origin === location.origin && link.pathname === location.pathname) pauseForNavigation();
+    });
+    window.addEventListener("hashchange", pauseForNavigation);
+    window.addEventListener("scrollend", endNavigation);
+    window.addEventListener("wheel", endNavigation, { passive: true });
+    window.addEventListener("touchstart", endNavigation, { passive: true });
+    window.addEventListener("keydown", e => { if (["ArrowDown", "ArrowUp", "PageDown", "PageUp", "Home", "End", " "].includes(e.key)) endNavigation(); });
+    window.addEventListener("resize", reset);
+    window.addEventListener("beforeprint", reset);
+    window.addEventListener("afterprint", reset);
+  }
 
   /* ---------------- capítulo atual no índice */
   if ("IntersectionObserver" in window) {
@@ -6854,6 +6911,7 @@ pytest tests/test_bench.py --benchmark-only  # tabela comparando as duas versõe
         window.scrollTo({ top: Math.max(0, top), behavior: "instant" });
       }
       ready = true;
+      initAutoProgress();
     }
     window.addEventListener("scroll", () => { clearTimeout(timer); timer = setTimeout(save, 250); }, { passive: true });
     window.addEventListener("pagehide", save);

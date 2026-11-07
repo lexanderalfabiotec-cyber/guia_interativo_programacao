@@ -509,6 +509,7 @@ details p{margin:6px 0 0}
         <li><b>Mini-quiz</b>: duas ou três perguntas com resposta revelável.</li>
       </ul>
       <p>Marcas de plataforma: <span class="badge device">no aparelho</span> <span class="badge cloud">na nuvem</span> <span class="badge os">só Android</span> <span class="badge os">só iOS</span>. Termos com sublinhado pontilhado, como <a class="term" href="#g-token">token</a>, mostram a definição ao passar o mouse ou tocar.</p>
+      <p>Ao rolar para baixo até o final de um módulo aparecer na tela, ele é marcado como concluído automaticamente e salvo neste navegador. Você também pode marcar ou desmarcar "Terminei este módulo" manualmente.</p>
       <p>Atalhos: <kbd>/</kbd> abre a busca e <kbd>Esc</kbd> fecha o que estiver aberto. Para PDF, use "Imprimir ou salvar PDF" no sumário e escolha "Salvar como PDF". "Exportar .md" gera um Markdown com os diagramas em blocos Mermaid.</p>
     </section>
 
@@ -1702,6 +1703,63 @@ function initProgress() {
   syncProgress();
 }
 
+/* ---------- conclusão ao rolar até o final do módulo ---------- */
+function initAutoProgress() {
+  const sections = $$('section.chapter[data-track]');
+  let previousY = window.scrollY, ticking = false;
+  let navigating = false, navigationTimer;
+  let bottoms = sections.map(s => s.getBoundingClientRect().bottom);
+  const reset = () => {
+    previousY = window.scrollY;
+    bottoms = sections.map(s => s.getBoundingClientRect().bottom);
+  };
+  const endNavigation = () => {
+    clearTimeout(navigationTimer);
+    if (navigating) reset();
+    navigating = false;
+  };
+  const pauseForNavigation = () => {
+    navigating = true;
+    clearTimeout(navigationTimer);
+    navigationTimer = setTimeout(endNavigation, 180);
+  };
+  function update() {
+    ticking = false;
+    if (navigating || document.hidden || matchMedia('print').matches) { reset(); return; }
+    const y = window.scrollY;
+    const viewportBottom = document.documentElement.clientHeight;
+    const viewportTop = $('.topbar').getBoundingClientRect().bottom;
+    let changed = false;
+    sections.forEach((section, i) => {
+      const bottom = section.getBoundingClientRect().bottom;
+      // Só conclui quando o final entra na tela ao descer, sem marcar módulos pulados.
+      if (y > previousY && bottoms[i] > viewportBottom && bottom <= viewportBottom && bottom >= viewportTop && !done.has(section.id)) {
+        done.add(section.id);
+        changed = true;
+      }
+      bottoms[i] = bottom;
+    });
+    previousY = y;
+    if (changed) { store.set('done', [...done]); syncProgress(); }
+  }
+  addEventListener('scroll', () => {
+    if (navigating) pauseForNavigation();
+    if (!ticking) { ticking = true; requestAnimationFrame(update); }
+  }, { passive: true });
+  document.addEventListener('click', e => {
+    const link = e.target.closest('a[href]');
+    if (link && link.hash && link.origin === location.origin && link.pathname === location.pathname) pauseForNavigation();
+  });
+  addEventListener('hashchange', pauseForNavigation);
+  addEventListener('scrollend', endNavigation);
+  addEventListener('wheel', endNavigation, { passive: true });
+  addEventListener('touchstart', endNavigation, { passive: true });
+  addEventListener('keydown', e => { if (['ArrowDown', 'ArrowUp', 'PageDown', 'PageUp', 'Home', 'End', ' '].includes(e.key)) endNavigation(); });
+  addEventListener('resize', reset);
+  addEventListener('beforeprint', reset);
+  addEventListener('afterprint', reset);
+}
+
 /* ---------- abas de código ---------- */
 function selectTab(box, lang) {
   $$(':scope > figure.code', box).forEach(f => { f.hidden = f.dataset.lang !== lang; });
@@ -2305,6 +2363,7 @@ function initReadingPosition() {
       window.scrollTo({ top: Math.max(0, top), behavior: 'instant' });
     }
     ready = true;
+    initAutoProgress();
   }
   addEventListener('scroll', () => { clearTimeout(timer); timer = setTimeout(save, 250); }, { passive: true });
   addEventListener('pagehide', save);
