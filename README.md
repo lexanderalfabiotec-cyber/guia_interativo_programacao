@@ -8,7 +8,7 @@ Repositório de cadernos e laboratórios interativos focados no aprendizado prá
 
 | Guia | Arquivo Principal | Descrição |
 | :--- | :--- | :--- |
-| **Laboratório Rust** | [`guias/rust/laboratorio-rust.html`](guias/rust/laboratorio-rust.html) | Caderno interativo com 20 capítulos cobrindo a base do Rust, integração com Python (PyO3/maturin), trading algorítmico, sistemas IoT embarcados e simuladores em tempo real. |
+| **Laboratório Rust** | [`guias/rust/laboratorio-rust.html`](guias/rust/laboratorio-rust.html) | Caderno interativo com 35 capítulos: os 23 temas do Guia Completo de Rust na Parte A, integração com Python (PyO3/maturin), trading algorítmico, sistemas IoT embarcados e simuladores em tempo real. |
 
 ---
 
@@ -69,7 +69,7 @@ Ou simplesmente dê duplo-clique no arquivo através do gerenciador de arquivos.
 Para compilar e testar os exemplos de código contidos no guia no seu próprio ambiente:
 
 ### 1. Pré-requisitos
-- **Rust e Cargo** (versão 1.70+ recomendada):
+- **Rust e Cargo** (versão 1.85+ para os exemplos com edição 2024):
   ```bash
   curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
   source $HOME/.cargo/env

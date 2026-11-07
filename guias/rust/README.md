@@ -28,37 +28,52 @@ xdg-open laboratorio-rust.html
 
 ## 🧭 Estrutura dos Módulos do Guia
 
-O guia está dividido em 6 partes e 20 capítulos práticos:
+O guia está dividido em 6 partes e 35 capítulos práticos. A Parte A cobre todos os 23 temas do [Guia Completo de Rust](Guia%20Completo%20de%20Rust.md), com explicações descontraídas, exemplos, comparações com Python e quizzes. Os exemplos comparativos que já existiam continuam disponíveis em caixas expansíveis nos respectivos capítulos.
 
 - **Parte A · Base da linguagem**
-  - `01` Comece por aqui & mapa de referências
-  - `02` Toolchain, Cargo e maturin
-  - `03` Tipos, variáveis e funções
-  - `04` Ownership e borrowing
-  - `05` Structs, enums e pattern matching
-  - `06` Tratamento de erros: Result, Option e exceções
-  - `07` Generics, traits e polimorfismo
-  - `08` Coleções, iteradores e closures
+  - `01` Introdução: o que é Rust e como usar o guia
+  - `02` Cargo e estrutura de projeto
+  - `03` Variáveis, mutabilidade, constantes e shadowing
+  - `04` Tipos de dados
+  - `05` Funções, expressões e controle de fluxo
+  - `06` Ownership e memória stack/heap
+  - `07` Borrowing, referências e slices
+  - `08` Lifetimes
+  - `09` Structs e métodos
+  - `10` Enums e pattern matching
+  - `11` Tratamento de erros: Option, Result e `?`
+  - `12` Coleções: Vec, String, HashMap e companhia
+  - `13` Traits
+  - `14` Generics
+  - `15` Closures e iteradores
+  - `16` Smart pointers: Box, Rc, RefCell e Arc
+  - `17` Módulos, crates e visibilidade
+  - `18` Concorrência: threads, channels e Mutex
+  - `19` Async/await com Tokio
+  - `20` Macros
+  - `21` Testes unitários, mocks, integração e doc tests
+  - `22` Unsafe e FFI com C e Python
+  - `23` Projeto final: CLI de tarefas com JSON e roteiro de oito semanas
 
 - **Parte B · Integração com Python**
-  - `09` A fronteira: PyO3 e a C-API
-  - `10` Passando dados sem cópia (NumPy / ndarray / PyBuffer)
-  - `11` O GIL: soltando para paralelismo real
-  - `12` Empacotando e distribuindo wheels com maturin
-  - `13` Arquitetura mista: Python na orquestração, Rust no motor
+  - `24` PyO3 e maturin na prática, incluindo NumPy sem cópia
+  - `25` Outras pontes: ctypes, subprocess e Rust chamando Python
+  - `26` Concorrência e async sem GIL
+  - `27` CLIs em Rust
 
 - **Parte C · Trading de Cripto**
-  - `14` Estratégia e backtest (com simulador interativo)
-  - `15` Tempo real: WebSockets, threads e canais sem locks
+  - `28` Dados de mercado e indicadores
+  - `29` Estratégia e backtest (com simulador interativo)
+  - `30` Tempo real: WebSocket, ordens e risco
 
 - **Parte D · IoT e Embarcados**
-  - `16` Microcontroladores: do hardware ao firmware (`no_std`)
-  - `17` Do sensor ao dashboard: MQTT e processamento de sinal
+  - `31` Microcontroladores: do hardware ao firmware (`no_std`)
+  - `32` Do sensor ao dashboard: MQTT e processamento de sinal
 
 - **Parte E · Avançado**
-  - `18` Unsafe e o Rustonomicon
-  - `19` Compilador Nightly e o Unstable Book
-  - `20` Testes, benchmarks (Criterion) e CI para projetos mistos
+  - `33` Unsafe e o Rustonomicon
+  - `34` Compilador Nightly e o Unstable Book
+  - `35` Testes, benchmarks (Criterion) e CI para projetos mistos
 
 - **Parte F · Fechamento**
   - Treino final interativo com questões sorteadas
@@ -70,7 +85,7 @@ O guia está dividido em 6 partes e 20 capítulos práticos:
 
 ### Testando Snippets Rust
 
-Para testar códigos apresentados no laboratório:
+Para testar códigos apresentados no laboratório, use Rust 1.85 ou posterior para os exemplos com edição 2024. Alguns exemplos requerem as dependências indicadas ao lado do código:
 
 ```bash
 # Crie uma sandbox temporária
