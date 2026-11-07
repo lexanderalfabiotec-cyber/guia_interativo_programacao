@@ -57,7 +57,7 @@ O guia também inclui mapa de dependências, glossário com analogias e fontes p
 - **Quizzes:** três perguntas na seção 0.4, com resposta e explicação imediatas.
 - **Busca:** pesquisa sem diferenciar maiúsculas ou acentos; `/` abre a busca, as setas percorrem os resultados e `Esc` fecha os controles abertos.
 - **Glossário:** definições por mouse, teclado ou toque, com navegação de volta ao trecho de leitura.
-- **Tema e progresso:** preferências e módulos marcados ficam nas chaves `fia:theme`, `fia:lang` e `fia:done` do `localStorage`. Sem acesso ao armazenamento, o progresso funciona durante a sessão. A contagem inclui os 14 módulos do roteiro, inclusive os planejados.
+- **Tema e progresso:** preferências, módulos marcados, ponto da leitura e respostas dos quizzes ficam nas chaves `fia:theme`, `fia:lang`, `fia:done`, `fia:reading` e `fia:quiz:<id>` do `localStorage`, mesmo após reiniciar o navegador. Sem acesso ao armazenamento, o progresso funciona durante a sessão e um aviso aparece no sumário. A contagem inclui os 14 módulos do roteiro, inclusive os planejados. Veja [onde os dados ficam salvos e como consultá-los](../../README.md#onde-o-progresso-fica-salvo).
 - **Exportação:** baixe o conteúdo em Markdown, com as três linguagens, tabelas, fontes Mermaid e âncoras dos links internos. Para PDF, use a impressão do navegador; todas as abas e explicações dos quizzes entram na impressão.
 
 Fontes do Google, highlight.js, Mermaid e Turndown são carregados pela internet. Sem esses recursos, o guia usa fontes locais, mostra os códigos sem realce, preserva os diagramas como texto Mermaid e exporta Markdown com o conversor interno.

@@ -139,3 +139,18 @@ Os módulos 1 a 13 ainda são planejamentos, incluindo a criação do aplicativo
   - Simulador de pipeline IoT com protocolo MQTT e filtro EMA.
 - **Quizzes Interativos**: Questões com diagnóstico instantâneo e explicação de erros de compilação.
 - **Progresso e Tema**: Armazenamento automático do seu progresso de estudo e preferência de tema (claro/escuro) no navegador (`localStorage`).
+
+## Onde o progresso fica salvo
+
+Os dois HTMLs salvam automaticamente no **`localStorage` do perfil do navegador**, no próprio computador. Os dados continuam disponíveis após fechar e reiniciar o navegador; nenhum arquivo de progresso é criado no projeto e nenhum dado é enviado a um servidor.
+
+| Guia | Chaves no `localStorage` |
+| :--- | :--- |
+| Rust | `labrs:done` (capítulos concluídos), `labrs:reading` (ponto da leitura), `labrs:quiz:<id>` (respostas), `labrs:treino:placar` e `labrs:treino:ativos` (treino), `labrs:tema` e `labrs:lang` (preferências) |
+| Flutter | `fia:done` (módulos concluídos), `fia:reading` (ponto da leitura), `fia:quiz:<id>` (respostas), `fia:theme` e `fia:lang` (preferências) |
+
+Ao reabrir o guia sem uma âncora (`#capitulo`) no endereço, ele retoma o ponto salvo. Links para um capítulo específico têm prioridade. As marcações e respostas são salvas imediatamente; a posição é salva durante a rolagem e ao sair da página.
+
+Para consultar os dados, abra as ferramentas do navegador (**F12 → Application/Aplicativo → Local Storage/Armazenamento local**) e selecione o endereço do guia.
+
+Use o mesmo navegador, perfil e endereço, incluindo protocolo, domínio e porta. `localhost` e `127.0.0.1`, ou portas diferentes, têm armazenamentos separados. Para arquivos abertos diretamente (`file://`), a persistência depende do navegador e do caminho do arquivo; prefira o servidor local com endereço fixo. Limpar os dados do site apaga o progresso, e janelas anônimas descartam os dados ao encerrar. Quando o armazenamento estiver bloqueado ou cheio, o guia exibirá um aviso junto ao progresso.

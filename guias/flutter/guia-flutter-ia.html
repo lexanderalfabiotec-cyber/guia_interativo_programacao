@@ -371,7 +371,7 @@ details p{margin:6px 0 0}
         <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2M7 14h10v6H7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
         Imprimir ou salvar PDF
       </button>
-      <p class="side-note">Seu progresso e suas preferências ficam salvos neste navegador. Em aba anônima, somem ao fechar.</p>
+      <p class="side-note" id="storage-status" role="status">Ative o JavaScript para salvar o progresso neste navegador.</p>
     </div>
   </aside>
   <div id="scrim" data-noexport></div>
@@ -918,7 +918,7 @@ pedido com T = 1.8 sai do proxy com T = 1.0</code></pre>
 
       <div class="quiz">
         <h4>Mini-quiz</h4>
-        <div class="q">
+        <div class="q" id="quiz-temperatura">
           <p class="q-text">1. Com os logits [2,0; 1,0; 0,1], a probabilidade de "Pix" é 65,9% em T = 1. O que acontece em T = 0,5?</p>
           <ol class="q-options">
             <li>Cai para cerca de 50%</li>
@@ -927,7 +927,7 @@ pedido com T = 1.8 sai do proxy com T = 1.0</code></pre>
           </ol>
           <details><summary>Ver resposta</summary><p>B. Dividir por 0,5 dobra as distâncias entre os logits (4, 2 e 0,2), e o favorito ganha: 54,598 ÷ 63,209 = 86,4%. Só chega a 100% no limite de T tendendo a zero.</p></details>
         </div>
-        <div class="q">
+        <div class="q" id="quiz-estabilidade">
           <p class="q-text">2. Por que subtrair o maior logit antes de calcular exp?</p>
           <ol class="q-options">
             <li>Para o modelo rodar mais rápido</li>
@@ -936,7 +936,7 @@ pedido com T = 1.8 sai do proxy com T = 1.0</code></pre>
           </ol>
           <details><summary>Ver resposta</summary><p>B. O fator exp(−c) aparece no numerador e no denominador e se cancela. Os números só ficam pequenos o bastante para caber no float.</p></details>
         </div>
-        <div class="q">
+        <div class="q" id="quiz-extracao">
           <p class="q-text">3. Seu app extrai valor, data e CNPJ de um recibo para JSON. Que temperatura usar?</p>
           <ol class="q-options">
             <li data-correct>0 ou bem perto de 0</li>
@@ -1530,11 +1530,19 @@ const CDN = {
   turndownAlt: 'https://unpkg.com/turndown@7.2.0/dist/turndown.js'
 };
 
-// localStorage pode não existir (aba anônima, preview): tudo em try/catch
+// localStorage persiste após reiniciar; armazenamento bloqueado não interrompe o guia.
+function storageStatus(ok) {
+  const el = $('#storage-status');
+  const text = ok
+    ? 'Progresso salvo automaticamente neste navegador, mesmo após reiniciar. Em janela anônima, dura só até fechá-la.'
+    : 'O navegador bloqueou o armazenamento ou está sem espaço. O progresso desta sessão não será salvo ao fechar.';
+  if (el && el.textContent !== text) el.textContent = text;
+}
 const store = {
   get(k, d) { try { const v = localStorage.getItem('fia:' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
-  set(k, v) { try { localStorage.setItem('fia:' + k, JSON.stringify(v)); } catch (e) { /* segue em memória */ } }
+  set(k, v) { try { localStorage.setItem('fia:' + k, JSON.stringify(v)); storageStatus(true); } catch (e) { storageStatus(false); } }
 };
+try { localStorage.setItem('fia:check', '1'); localStorage.removeItem('fia:check'); storageStatus(true); } catch (e) { storageStatus(false); }
 
 const loaded = {};
 function loadScript(src) {
@@ -1854,21 +1862,28 @@ function initQuizzes() {
     const opts = $$('.q-options > li', q);
     const det = $('details', q);
     const fb = document.createElement('p'); fb.className = 'q-feedback'; fb.dataset.noexport = ''; fb.setAttribute('aria-live', 'polite');
-    opts.forEach(li => {
+    function reveal(index) {
+      const li = opts[index];
+      const right = li.hasAttribute('data-correct');
+      opts.forEach(o => o.classList.remove('right', 'wrong'));
+      opts.forEach(o => { if (o.hasAttribute('data-correct')) o.classList.add('right'); });
+      if (!right) li.classList.add('wrong');
+      fb.className = 'q-feedback ' + (right ? 'ok' : 'no');
+      fb.textContent = right ? acertos[qi % acertos.length] : 'Quase. A certa está marcada; a explicação abriu logo abaixo.';
+      if (det) det.open = true;
+    }
+    opts.forEach((li, index) => {
       const b = document.createElement('button'); b.type = 'button'; b.className = 'opt';
       while (li.firstChild) b.appendChild(li.firstChild);
       li.appendChild(b);
       b.addEventListener('click', () => {
-        const right = li.hasAttribute('data-correct');
-        opts.forEach(o => o.classList.remove('right', 'wrong'));
-        opts.forEach(o => { if (o.hasAttribute('data-correct')) o.classList.add('right'); });
-        if (!right) li.classList.add('wrong');
-        fb.className = 'q-feedback ' + (right ? 'ok' : 'no');
-        fb.textContent = right ? acertos[qi % acertos.length] : 'Quase. A certa está marcada; a explicação abriu logo abaixo.';
-        if (det) det.open = true;
+        reveal(index);
+        store.set('quiz:' + q.id, index);
       });
     });
     $('.q-options', q).after(fb);
+    const saved = store.get('quiz:' + q.id, null);
+    if (Number.isInteger(saved) && saved >= 0 && saved < opts.length) reveal(saved);
   });
 }
 
@@ -2260,6 +2275,44 @@ const Demo = (() => {
   return { init, redraw: () => draw() };
 })();
 
+/* ---------- retomar a leitura após reabrir o navegador ---------- */
+function initReadingPosition() {
+  const sections = $$('main section.chapter, main section.hero');
+  let ready = false, timer;
+  function save() {
+    clearTimeout(timer);
+    if (!ready || matchMedia('print').matches) return;
+    let section = null;
+    for (const candidate of sections) {
+      if (candidate.getBoundingClientRect().top > 120) break;
+      section = candidate;
+    }
+    const rect = section?.getBoundingClientRect();
+    store.set('reading', {
+      section: section?.id || null,
+      fraction: rect ? Math.max(0, Math.min(1, (120 - rect.top) / Math.max(1, rect.height))) : 0,
+      y: window.scrollY
+    });
+  }
+  function restore() {
+    const saved = store.get('reading', null);
+    // Links para capítulos específicos têm prioridade sobre a leitura anterior.
+    if (!location.hash && saved && Number.isFinite(saved.y) && saved.y >= 0) {
+      const section = sections.find(s => s.id === saved.section);
+      const rect = section?.getBoundingClientRect();
+      const fraction = Number.isFinite(saved.fraction) ? Math.max(0, Math.min(1, saved.fraction)) : 0;
+      const top = rect ? window.scrollY + rect.top + rect.height * fraction - 120 : saved.y;
+      window.scrollTo({ top: Math.max(0, top), behavior: 'instant' });
+    }
+    ready = true;
+  }
+  addEventListener('scroll', () => { clearTimeout(timer); timer = setTimeout(save, 250); }, { passive: true });
+  addEventListener('pagehide', save);
+  document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
+  if (document.readyState === 'complete') restore();
+  else addEventListener('load', restore, { once: true });
+}
+
 /* ---------- partida ---------- */
 function init() {
   initTheme();
@@ -2276,6 +2329,7 @@ function init() {
   initPrint();
   initExport();
   initScrollSpy();
+  initReadingPosition();
   Demo.init();
   initHighlight();
   initMermaid();
