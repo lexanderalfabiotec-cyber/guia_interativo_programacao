@@ -8,7 +8,7 @@
 <script>try{var t=JSON.parse(localStorage.getItem('fia:theme'));if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&amp;family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;1,400&amp;family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&amp;display=swap" rel="stylesheet">
 <style>
 /* =========================================================
    Tokens. Duas cores têm significado no guia inteiro:
@@ -17,41 +17,25 @@
    --jank   (vermelho)      = pegadinha, travada, erro
    ========================================================= */
 :root{
-  --paper:#F4F6F9; --surface:#FFFFFF; --sunken:#E8ECF2; --ink:#1A2233; --muted:#566079; --line:#D7DCE5;
-  --link:#1F55B8; --focus:#2F5BD3; --note:#2F5BD3;
-  --device:#0B7C7E; --device-soft:#DCF0EF; --cloud:#975A00; --cloud-soft:#F6E8D2; --jank:#B8322B; --jank-soft:#F8E0DE;
-  --grid:rgba(26,34,51,.05);
-  --code-bg:#EDF0F5; --code-ink:#1A2233;
-  --hl-kw:#7A3EB1; --hl-str:#0B6E4F; --hl-num:#A4410F; --hl-com:#69728A; --hl-fn:#1F5FB8; --hl-type:#875800; --hl-meta:#B8322B;
-  --shadow:0 12px 32px rgba(16,24,40,.16);
+  --paper:light-dark(#F4F6F9,#11151D); --surface:light-dark(#FFFFFF,#171D28); --sunken:light-dark(#E8ECF2,#0E131B);
+  --ink:light-dark(#1A2233,#E5E9F0); --muted:light-dark(#566079,#9CA6B8); --line:light-dark(#D7DCE5,#283142);
+  --link:light-dark(#1F55B8,#8DB4FF); --focus:light-dark(#2F5BD3,#8DB4FF); --note:var(--focus);
+  --device:light-dark(#0B7C7E,#45C8C5); --device-soft:light-dark(#DCF0EF,#11302F);
+  --cloud:light-dark(#975A00,#E6A64C); --cloud-soft:light-dark(#F6E8D2,#33270F);
+  --jank:light-dark(#B8322B,#F2776E); --jank-soft:light-dark(#F8E0DE,#3A1D1B);
+  --grid:light-dark(rgba(26,34,51,.05),rgba(229,233,240,.05));
+  --code-bg:light-dark(#EDF0F5,#0E131C); --code-ink:light-dark(#1A2233,#E2E6EE);
+  --hl-kw:light-dark(#7A3EB1,#CBA6F7); --hl-str:light-dark(#0B6E4F,#86D9AE); --hl-num:light-dark(#A4410F,#F4A974);
+  --hl-com:light-dark(#69728A,#7E899E); --hl-fn:light-dark(#1F5FB8,#8DB8FF); --hl-type:light-dark(#875800,#E9C46A); --hl-meta:var(--jank);
+  --shadow:0 12px 32px light-dark(rgba(16,24,40,.16),rgba(0,0,0,.45));
   --f-display:"Bricolage Grotesque", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --f-body:"Atkinson Hyperlegible Next", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --f-mono:"Atkinson Hyperlegible Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
   --top-h:60px; --side-w:300px; --measure:72ch;
-  color-scheme:light;
+  color-scheme:light dark;
 }
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --paper:#11151D; --surface:#171D28; --sunken:#0E131B; --ink:#E5E9F0; --muted:#9CA6B8; --line:#283142;
-    --link:#8DB4FF; --focus:#8DB4FF; --note:#8DB4FF;
-    --device:#45C8C5; --device-soft:#11302F; --cloud:#E6A64C; --cloud-soft:#33270F; --jank:#F2776E; --jank-soft:#3A1D1B;
-    --grid:rgba(229,233,240,.05);
-    --code-bg:#0E131C; --code-ink:#E2E6EE;
-    --hl-kw:#CBA6F7; --hl-str:#86D9AE; --hl-num:#F4A974; --hl-com:#7E899E; --hl-fn:#8DB8FF; --hl-type:#E9C46A; --hl-meta:#F2776E;
-    --shadow:0 12px 32px rgba(0,0,0,.45);
-    color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --paper:#11151D; --surface:#171D28; --sunken:#0E131B; --ink:#E5E9F0; --muted:#9CA6B8; --line:#283142;
-  --link:#8DB4FF; --focus:#8DB4FF; --note:#8DB4FF;
-  --device:#45C8C5; --device-soft:#11302F; --cloud:#E6A64C; --cloud-soft:#33270F; --jank:#F2776E; --jank-soft:#3A1D1B;
-  --grid:rgba(229,233,240,.05);
-  --code-bg:#0E131C; --code-ink:#E2E6EE;
-  --hl-kw:#CBA6F7; --hl-str:#86D9AE; --hl-num:#F4A974; --hl-com:#7E899E; --hl-fn:#8DB8FF; --hl-type:#E9C46A; --hl-meta:#F2776E;
-  --shadow:0 12px 32px rgba(0,0,0,.45);
-  color-scheme:dark;
-}
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
 
 /* ---------- base ---------- */
 *,*::before,*::after{box-sizing:border-box}
@@ -141,7 +125,7 @@ h1{font:800 clamp(2.4rem,5vw,3.7rem)/1.02 var(--f-display);letter-spacing:-.03em
 .bubble.bot{background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:4px;min-height:4.2em}
 .bubble.bot:empty::before{content:"Toque num dos botões abaixo";color:var(--muted)}
 .meter{margin-top:14px}
-#demo-meter{width:100%;height:64px;display:block;background:var(--sunken);border-radius:9px;border:1px solid var(--line)}
+#demo-meter{width:100%;height:64px;display:block;color:var(--muted);background:var(--sunken);border-radius:9px;border:1px solid var(--line)}
 .meter-stats{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:.8rem;color:var(--muted);margin-top:6px}
 .meter-stats b{color:var(--ink);font-variant-numeric:tabular-nums}
 .demo-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
@@ -409,7 +393,7 @@ details p{margin:6px 0 0}
 
     <aside class="demo" id="demo" aria-labelledby="demo-title" data-noexport>
       <p class="demo-title" id="demo-title">Teste em 10 segundos: por que o Isolate existe</p>
-      <p class="demo-sub">A <a class="term" href="#g-thread-ui">thread da UI</a> precisa entregar um quadro a cada 16,7 ms. Rode o mesmo "modelo" de 1,5 s nos dois lugares e observe a bolinha e o gráfico.</p>
+      <p class="demo-sub">A 60 Hz, a <a class="term" href="#g-thread-ui">thread da UI</a> precisa entregar um quadro a cada 16,7 ms. Rode o mesmo "modelo" de 1,5 s nos dois lugares e observe a bolinha e o gráfico.</p>
       <div class="phone">
         <div class="phone-top"><span>Assistente</span><span class="spin-wrap"><span id="demo-spinner" aria-hidden="true"></span><span id="demo-frame" aria-hidden="true">0</span></span></div>
         <div class="bubble user">Quanto gastei com mercado?</div>
@@ -431,7 +415,7 @@ details p{margin:6px 0 0}
   <!-- ===================== MAPA ===================== -->
   <section class="chapter" id="mapa">
     <h2>Mapa do guia</h2>
-    <p class="chapter-intro">São 14 módulos, do ambiente instalado até um assistente financeiro que funciona sem internet. A coluna do meio é a regra de ouro do guia: nenhum conceito de Flutter ou Dart aparece sem uma aplicação de IA ao lado.</p>
+    <p class="chapter-intro">O roteiro prevê 14 módulos, do ambiente instalado até um assistente financeiro que funciona sem internet. Nesta entrega, o módulo 0 está pronto; os módulos 1 a 13 contêm o planejamento das próximas partes. A coluna do meio liga cada conceito de Flutter ou Dart a uma aplicação de IA.</p>
     <div class="table-wrap">
       <table>
         <thead><tr><th>Módulo</th><th>Flutter e Dart</th><th>IA no mesmo capítulo</th><th>Matemática</th></tr></thead>
@@ -530,7 +514,7 @@ details p{margin:6px 0 0}
 
     <section class="topic" id="m0-2">
       <h3>0.2 Versões, ambiente e avisos de atualização</h3>
-      <div class="block tldr"><h4>TL;DR</h4><p>Flutter 3.47 com Dart 3.13, Material como pacote separado, Riverpod 3, Python 3.12+ e Go 1.24+. Tutorial antigo que importa <code>package:flutter/material.dart</code> está ficando para trás.</p></div>
+      <div class="block tldr"><h4>TL;DR</h4><p>Flutter 3.47 com Dart 3.13, Riverpod 3, Python 3.12+ e Go 1.24+. Material e Cupertino também estão disponíveis como pacotes separados; a migração é opcional nessa versão.</p></div>
       <div class="table-wrap">
         <table>
           <thead><tr><th>Ferramenta</th><th>Versão usada no guia</th><th>Onde conferir</th></tr></thead>
@@ -556,8 +540,8 @@ go version          # 1.24 ou mais novo</code></pre>
 
       <div class="block note">
         <h4>Aviso de atualização: Material virou pacote</h4>
-        <p>A partir do Flutter 3.47, Material e Cupertino existem como pacotes independentes no pub.dev (<code>material_ui</code> e <code>cupertino_ui</code>), e as bibliotecas embutidas no SDK estão marcadas para depreciação no lançamento de novembro. Muito tutorial (e muita resposta de IA por aí) ainda usa o import antigo. Neste guia, o primeiro app já nasce com o pacote novo.</p>
-        <p>Projeto antigo? Um comando migra os imports: <code>dart fix --apply --code=migrate_design_widgets</code>. Fonte: <a href="https://docs.flutter.dev/release/breaking-changes/material-ui-and-cupertino-ui">guia de migração na docs.flutter.dev</a>.</p>
+        <p>A partir do Flutter 3.47, Material e Cupertino existem como pacotes independentes no pub.dev (<code>material_ui</code> e <code>cupertino_ui</code>). A documentação prevê a depreciação das bibliotecas embutidas em uma versão estável futura, sem fixar uma data. Os imports do SDK continuam disponíveis nessa versão.</p>
+        <p>Para migrar, execute <code>dart fix --apply --code=migrate_design_widgets</code>. Se as dependências não forem adicionadas ao <code>pubspec.yaml</code>, use <code>flutter pub add material_ui</code> e/ou <code>flutter pub add cupertino_ui</code>, conforme os componentes utilizados. Fonte: <a href="https://docs.flutter.dev/release/breaking-changes/material-ui-and-cupertino-ui">guia de migração na docs.flutter.dev</a>.</p>
       </div>
       <div class="block note">
         <h4>Aviso de atualização: nomes novos para coisas conhecidas</h4>
@@ -571,7 +555,7 @@ go version          # 1.24 ou mais novo</code></pre>
     <section class="topic" id="m0-3">
       <h3>0.3 Fontes e materiais de apoio</h3>
       <div class="block tldr"><h4>TL;DR</h4><p>A base é a documentação oficial (docs.flutter.dev, dart.dev, pub.dev e a documentação de cada provedor). Cada módulo lista os links que usou.</p></div>
-      <p>Nenhum livro anexado chegou junto com o pedido, só as instruções. Se você anexar livros ou apostilas, cada conceito tirado deles ganha a citação (obra, capítulo e página) no próprio bloco, e um aviso quando o material estiver atrás do ecossistema atual.</p>
+      <p>O guia usa as fontes oficiais indicadas em cada módulo. Ao acrescentar livros ou apostilas como material de apoio, registre obra, capítulo e página junto ao conceito e confira se o exemplo ainda corresponde à versão do SDK utilizada.</p>
       <p>Da <a href="https://docs.flutter.dev/">docs.flutter.dev</a>, as seções que mais alimentam o guia:</p>
       <div class="table-wrap">
         <table>
@@ -678,17 +662,20 @@ import 'dart:math';
 /// Subtrair a mesma constante de todos os logits não muda o resultado
 /// (ela se cancela na divisão), mas mantém os números pequenos.
 List&lt;double&gt; softmax(List&lt;double&gt; logits, {double temperature = 1.0}) {
-  if (temperature &lt;= 0) {
+  if (!temperature.isFinite || temperature &lt;= 0) {
     // T = 0 quer dizer "sempre o mais provável" (argmax).
     // Dividir por zero não é estratégia, é bug.
     throw ArgumentError.value(
-        temperature, 'temperature', 'use T &gt; 0; trate T = 0 como argmax');
+        temperature, 'temperature', 'use T finita &gt; 0; trate T = 0 como argmax');
+  }
+  if (logits.isEmpty || logits.any((z) =&gt; !z.isFinite)) {
+    throw ArgumentError('logits devem ser uma lista não vazia de números finitos');
   }
   // collection for: monta a lista já transformada, sem map().toList()
-  final scaled = [for (final z in logits) z / temperature];
   // max de dart:math passado como função (tear-off)
-  final maior = scaled.reduce(max);
-  final exps = [for (final z in scaled) exp(z - maior)];
+  final maior = logits.reduce(max);
+  // Subtrai ANTES de dividir: z / T poderia estourar com T muito pequena.
+  final exps = [for (final z in logits) exp((z - maior) / temperature)];
   final soma = exps.reduce((a, b) =&gt; a + b);
   return [for (final e in exps) e / soma];
 }
@@ -746,11 +733,15 @@ import numpy as np
 
 def softmax(logits, temperature: float = 1.0) -&gt; np.ndarray:
     """Softmax numericamente estável: subtrai o máximo antes do exp."""
-    if temperature &lt;= 0:
-        raise ValueError("use T &gt; 0; trate T = 0 como argmax")
-    z = np.asarray(logits, dtype=np.float64) / temperature
-    z = z - z.max()  # truque do máximo: evita overflow em np.exp
-    e = np.exp(z)
+    if not np.isfinite(temperature) or temperature &lt;= 0:
+        raise ValueError("use T finita &gt; 0; trate T = 0 como argmax")
+    z = np.asarray(logits, dtype=np.float64)
+    if z.ndim != 1 or z.size == 0 or not np.isfinite(z).all():
+        raise ValueError("logits devem ser um vetor não vazio de números finitos")
+    # Subtrai ANTES de dividir. Diferenças extremas podem virar -inf:
+    # isso é seguro, pois exp(-inf) = 0 e o maior logit continua em zero.
+    with np.errstate(over="ignore", under="ignore"):
+        e = np.exp((z - z.max()) / temperature)
     return e / e.sum()
 
 
@@ -831,28 +822,37 @@ import (
 // Por quê: quem manda é o servidor. Um app adulterado poderia pedir T = 5
 // e transformar o seu assistente financeiro num poeta concretista.
 const (
-	minTemperature = 0.0 // 0 = o provedor escolhe sempre o token mais provável
+	minTemperature = 0.0 // 0 = modo greedy, se o provedor aceitar esse valor
 	maxTemperature = 1.0 // teto para respostas sobre dinheiro
 )
 
 // clampTemperature prende a temperatura pedida dentro da política.
-func clampTemperature(t float64) float64 {
-	return math.Min(math.Max(t, minTemperature), maxTemperature)
+func clampTemperature(t float64) (float64, error) {
+	if math.IsNaN(t) || math.IsInf(t, 0) {
+		return 0, errors.New("temperatura deve ser finita")
+	}
+	return math.Min(math.Max(t, minTemperature), maxTemperature), nil
 }
 
 // softmax com o truque do máximo para não estourar math.Exp.
 func softmax(logits []float64, temperature float64) ([]float64, error) {
-	if temperature &lt;= 0 {
-		return nil, errors.New("use T &gt; 0; trate T = 0 como argmax")
+	if math.IsNaN(temperature) || math.IsInf(temperature, 0) || temperature &lt;= 0 {
+		return nil, errors.New("use T finita &gt; 0; trate T = 0 como argmax")
+	}
+	if len(logits) == 0 {
+		return nil, errors.New("logits não podem estar vazios")
 	}
 	maior := math.Inf(-1)
 	for _, z := range logits {
-		maior = math.Max(maior, z/temperature)
+		if math.IsNaN(z) || math.IsInf(z, 0) {
+			return nil, errors.New("logits devem ser finitos")
+		}
+		maior = math.Max(maior, z)
 	}
 	probs := make([]float64, len(logits))
 	soma := 0.0
 	for i, z := range logits {
-		probs[i] = math.Exp(z/temperature - maior)
+		probs[i] = math.Exp((z - maior) / temperature)
 		soma += probs[i]
 	}
 	for i := range probs {
@@ -879,7 +879,12 @@ func main() {
 	}
 
 	// Pedido vindo do app com temperatura exagerada:
-	fmt.Printf("pedido com T = 1.8 sai do proxy com T = %.1f\n", clampTemperature(1.8))
+	t, err := clampTemperature(1.8)
+	if err != nil {
+		fmt.Println("erro:", err)
+		return
+	}
+	fmt.Printf("pedido com T = 1.8 sai do proxy com T = %.1f\n", t)
 }</code></pre>
           <p class="out-label">Saída:</p>
           <pre class="output"><code class="language-plaintext">T = 0.5  -&gt;   Pix 86.4%   TED 11.7%   boleto 1.9%
@@ -1536,9 +1541,11 @@ function loadScript(src) {
   if (loaded[src]) return loaded[src];
   loaded[src] = new Promise((res, rej) => {
     const s = document.createElement('script');
+    const fail = () => { clearTimeout(timer); s.remove(); delete loaded[src]; rej(new Error('Falha ao carregar ' + src)); };
+    const timer = setTimeout(fail, 8000);
     s.src = src; s.async = true;
-    s.onload = () => res();
-    s.onerror = () => { delete loaded[src]; rej(new Error('Falha ao carregar ' + src)); };
+    s.onload = () => { clearTimeout(timer); res(); };
+    s.onerror = fail;
     document.head.appendChild(s);
   });
   return loaded[src];
@@ -1634,36 +1641,55 @@ function initScrollSpy() {
     });
   };
   addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+  addEventListener('resize', update);
   update();
 }
 
-function openNav() { document.body.classList.add('nav-open'); $('#menu-btn').setAttribute('aria-expanded', 'true'); }
-function closeNav() { document.body.classList.remove('nav-open'); $('#menu-btn').setAttribute('aria-expanded', 'false'); }
+const mobileNav = matchMedia('(max-width: 920px)');
+function syncNav() {
+  const open = mobileNav.matches && document.body.classList.contains('nav-open');
+  $('#sidebar').inert = mobileNav.matches && !open;
+  $('main').inert = open;
+  $('#menu-btn').setAttribute('aria-expanded', String(open));
+  $('#menu-btn').setAttribute('aria-label', open ? 'Fechar sumário' : 'Abrir sumário');
+}
+function openNav() {
+  document.body.classList.add('nav-open'); syncNav();
+  $('#sidebar a').focus();
+}
+function closeNav() {
+  const hadFocus = mobileNav.matches && $('#sidebar').contains(document.activeElement);
+  document.body.classList.remove('nav-open'); syncNav();
+  if (hadFocus) $('#menu-btn').focus();
+}
 function initNav() {
   $('#menu-btn').addEventListener('click', () => document.body.classList.contains('nav-open') ? closeNav() : openNav());
   $('#scrim').addEventListener('click', closeNav);
+  mobileNav.addEventListener('change', closeNav);
+  syncNav();
 }
 
 /* ---------- progresso ---------- */
-const done = new Set(store.get('done', []));
+const trackedModules = $$('section.chapter[data-track]').map(s => s.id);
+const savedDone = store.get('done', []);
+const done = new Set(Array.isArray(savedDone) ? savedDone.filter(id => trackedModules.includes(id)) : []);
 function syncProgress() {
   $$('input[data-done]').forEach(i => { i.checked = done.has(i.dataset.done); });
   $$('.toc-ch').forEach(li => li.classList.toggle('done', done.has(li.dataset.target)));
-  const tracked = $$('section.chapter[data-track]').map(s => s.id);
-  const n = tracked.filter(id => done.has(id)).length;
+  const n = trackedModules.filter(id => done.has(id)).length;
   const p = $('#progress');
-  p.setAttribute('aria-valuemax', String(tracked.length));
+  p.setAttribute('aria-valuemax', String(trackedModules.length));
   p.setAttribute('aria-valuenow', String(n));
-  p.style.setProperty('--p', tracked.length ? n / tracked.length : 0);
-  $('#progress-text').textContent = n + ' de ' + tracked.length;
-  p.title = n + ' de ' + tracked.length + ' módulos concluídos';
+  p.style.setProperty('--p', trackedModules.length ? n / trackedModules.length : 0);
+  $('#progress-text').textContent = n + ' de ' + trackedModules.length;
+  p.title = n + ' de ' + trackedModules.length + ' módulos concluídos';
 }
 function initProgress() {
   document.addEventListener('change', e => {
     const i = e.target.closest('input[data-done]'); if (!i) return;
     if (i.checked) done.add(i.dataset.done); else done.delete(i.dataset.done);
     store.set('done', [...done]); syncProgress();
-    if (i.checked && done.size === $$('section.chapter[data-track]').length) toast('Guia inteiro concluído. Agora é abrir o editor e fazer o app.');
+    if (i.checked && trackedModules.every(id => done.has(id))) toast('Todos os módulos do roteiro foram marcados como concluídos. Confira os avisos de conteúdo planejado.');
   });
   syncProgress();
 }
@@ -1866,6 +1892,7 @@ const tip = () => $('#tip');
 let tipFor = null;
 function showTip(a, touch) {
   const entry = document.getElementById(a.getAttribute('href').slice(1)); if (!entry) return;
+  if (tipFor && tipFor !== a) tipFor.removeAttribute('aria-describedby');
   const t = tip(); t.textContent = '';
   const s = document.createElement('strong'); s.textContent = $('dt', entry).textContent; t.appendChild(s);
   const d = document.createElement('p'); d.textContent = ($('.g-def', entry) || {}).textContent || ''; t.appendChild(d);
@@ -1908,6 +1935,7 @@ function initTerms() {
 
 /* ---------- busca ---------- */
 let index = [];
+let searchTimer;
 function buildIndex() {
   index = [];
   $$('main section.chapter, main section.topic').forEach(sec => {
@@ -1971,11 +1999,16 @@ function runSearch(q) {
   });
   box.hidden = false; input.setAttribute('aria-expanded', 'true');
 }
-function closeSearch() { $('#search-results').hidden = true; $('#search-input').setAttribute('aria-expanded', 'false'); }
+function closeSearch() {
+  clearTimeout(searchTimer);
+  const input = $('#search-input');
+  const hadFocus = $('#search-results').contains(document.activeElement);
+  if (hadFocus) input.focus();
+  $('#search-results').hidden = true; input.setAttribute('aria-expanded', 'false');
+}
 function initSearch() {
   const input = $('#search-input'); const box = $('#search-results');
-  let t;
-  input.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => runSearch(input.value), 120); });
+  input.addEventListener('input', () => { clearTimeout(searchTimer); searchTimer = setTimeout(() => runSearch(input.value), 120); });
   input.addEventListener('focus', () => { if (input.value.trim()) runSearch(input.value); });
   input.addEventListener('keydown', e => {
     if (e.key === 'ArrowDown') { const f = $('.result', box); if (f) { e.preventDefault(); f.focus(); } }
@@ -2010,7 +2043,13 @@ function cleanCloneForExport() {
   $$('pre.mermaid-src', c).forEach(p => p.removeAttribute('hidden'));         // ...e o código Mermaid fica
   $$('figure.code[hidden]', c).forEach(f => f.removeAttribute('hidden'));     // todas as abas entram
   $$('[data-noexport], button, input, #tip, script, style', c).forEach(n => n.remove());
-  $$('a[href^="#"]', c).forEach(a => { if (a.classList.contains('term')) a.removeAttribute('class'); });
+  // Os IDs originais precisam sobreviver: os links internos usam #m0-4, #g-token etc.
+  $$('section[id], .g-entry[id], h3[id]', c).forEach(node => {
+    const anchor = document.createElement('a'); anchor.id = node.id; anchor.dataset.mdAnchor = '';
+    // Texto provisório evita que o Turndown descarte a âncora como elemento vazio.
+    anchor.textContent = node.id;
+    node.removeAttribute('id'); node.before(anchor);
+  });
   return c;
 }
 function cellText(td) { return td.textContent.replace(/\s+/g, ' ').trim().replace(/\|/g, '\\|'); }
@@ -2054,7 +2093,8 @@ function miniMarkdown(el) {
       if (n.nodeType === 3) { const t = n.nodeValue.trim(); if (t) out.push(t, ''); return; }
       if (n.nodeType !== 1) return;
       const t = n.tagName;
-      if (/^H[1-6]$/.test(t)) out.push('#'.repeat(+t[1]) + ' ' + inline(n).trim(), '');
+      if (n.hasAttribute('data-md-anchor')) out.push('<a id="' + n.id + '"></a>', '');
+      else if (/^H[1-6]$/.test(t)) out.push('#'.repeat(+t[1]) + ' ' + inline(n).trim(), '');
       else if (t === 'P' && n.classList.contains('formula')) out.push('`' + n.textContent.trim() + '`', '');
       else if (t === 'P' || t === 'FIGCAPTION') out.push((t === 'FIGCAPTION' ? '_' + inline(n).trim() + '_' : inline(n).trim()), '');
       else if (t === 'SUMMARY' || t === 'DT') out.push('**' + inline(n).trim() + '**', '');
@@ -2081,6 +2121,8 @@ async function exportMarkdown() {
   let md;
   if (TD) {
     const td = new TD({ headingStyle: 'atx', codeBlockStyle: 'fenced', bulletListMarker: '-', emDelimiter: '_' });
+    td.addRule('ancora', { filter: node => node.hasAttribute('data-md-anchor'),
+      replacement: (c, node) => '\n\n<a id="' + node.id + '"></a>\n\n' });
     td.addRule('tabela', { filter: 'table', replacement: (c, node) => tableToMd(node) });
     td.addRule('formula', { filter: node => node.nodeName === 'P' && node.classList.contains('formula'), replacement: (c, node) => '\n\n`' + node.textContent.trim() + '`\n\n' });
     td.addRule('legenda', { filter: 'figcaption', replacement: c => '\n\n_' + c.trim() + '_\n\n' });
@@ -2106,9 +2148,13 @@ const Demo = (() => {
   let canvas, ctx, frames = [], running = false, stopAt = 0, last = 0, angle = 0, frameNo = 0, maxGap = 0, lost = 0, busy = false;
   const el = id => document.getElementById(id);
 
-  function colors() { const cs = getComputedStyle(root); return { ok: cs.getPropertyValue('--muted').trim(), bad: cs.getPropertyValue('--jank').trim(), line: cs.getPropertyValue('--ink').trim(), bg: cs.getPropertyValue('--sunken').trim() }; }
+  function colors() {
+    // Canvas precisa de cores resolvidas; não interpreta light-dark() de uma custom property.
+    return { ok: getComputedStyle(canvas).color, bad: getComputedStyle(el('run-main')).color,
+      line: getComputedStyle(document.body).color };
+  }
   function size() {
-    if (!canvas) return;
+    if (!canvas || !ctx) return;
     const dpr = Math.min(devicePixelRatio || 1, 2); const w = canvas.clientWidth || 260; const h = canvas.clientHeight || 64;
     canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   }
@@ -2175,16 +2221,25 @@ const Demo = (() => {
   function runIsolate() {
     if (busy) return;
     begin('Gerando num Isolate (aqui, um Web Worker)…');
-    let w = null;
-    try { w = new Worker(URL.createObjectURL(new Blob([WORKER_SRC], { type: 'text/javascript' }))); } catch (e) { w = null; }
-    const ok = 'Pronto, e a bolinha não parou. O trabalho pesado rodou em outra linha de execução e mandou os tokens por mensagem, um a um. É o que o Isolate faz no Dart.';
-    if (!w) { simulate(ok); return; }
-    w.onmessage = e => {
-      if (e.data.token) el('demo-answer').textContent += e.data.token;
-      if (e.data.done) { w.terminate(); finish(ok, 'device'); }
+    let w = null, workerUrl = null, watchdog;
+    const dispose = () => {
+      clearTimeout(watchdog);
+      if (w) { w.onmessage = null; w.onerror = null; w.terminate(); w = null; }
+      if (workerUrl) { URL.revokeObjectURL(workerUrl); workerUrl = null; }
     };
-    w.onerror = () => { try { w.terminate(); } catch (e) {} simulate(ok); };
-    w.postMessage({ tokens: TOKENS, ms: WORK_MS });
+    const ok = 'Pronto, e a bolinha não parou. O trabalho pesado rodou em outra linha de execução e mandou os tokens por mensagem, um a um. É o que o Isolate faz no Dart.';
+    const fallback = () => { dispose(); el('demo-answer').textContent = ''; simulate(ok); };
+    try {
+      workerUrl = URL.createObjectURL(new Blob([WORKER_SRC], { type: 'text/javascript' }));
+      w = new Worker(workerUrl);
+      w.onmessage = e => {
+        if (e.data.token) el('demo-answer').textContent += e.data.token;
+        if (e.data.done) { dispose(); finish(ok, 'device'); }
+      };
+      w.onerror = e => { e.preventDefault(); fallback(); };
+      watchdog = setTimeout(fallback, 10000);
+      w.postMessage({ tokens: TOKENS, ms: WORK_MS });
+    } catch (e) { fallback(); }
   }
   // Reserva para navegadores que bloqueiam Worker: espera sem ocupar a thread (simulação)
   function simulate(ok) {

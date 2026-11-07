@@ -6,15 +6,16 @@ Repositório de cadernos e laboratórios interativos focados no aprendizado prá
 
 ## 📚 Guias Disponíveis
 
-| Guia | Arquivo Principal | Descrição |
-| :--- | :--- | :--- |
-| **Laboratório Rust** | [`guias/rust/laboratorio-rust.html`](guias/rust/laboratorio-rust.html) | Caderno interativo com 35 capítulos: os 23 temas do Guia Completo de Rust na Parte A, integração com Python (PyO3/maturin), trading algorítmico, sistemas IoT embarcados e simuladores em tempo real. |
+| Guia | Arquivo Principal | Descrição | Documentação |
+| :--- | :--- | :--- | :--- |
+| **Laboratório Rust** | [`guias/rust/laboratorio-rust.html`](guias/rust/laboratorio-rust.html) | Caderno interativo com 35 capítulos: os 23 temas do Guia Completo de Rust na Parte A, integração com Python (PyO3/maturin), trading algorítmico, sistemas IoT embarcados e simuladores em tempo real. | [Guia de uso](guias/rust/README.md) |
+| **Flutter com IA no bolso** | [`guias/flutter/guia-flutter-ia.html`](guias/flutter/guia-flutter-ia.html) | Guia de Flutter, Dart e IA: módulo 0 disponível com softmax em Dart/Python/Go, demo de concorrência, quizzes e exportações; módulos 1 a 13 planejados. | [Guia de uso](guias/flutter/README.md) · [Validação](guias/flutter/VALIDACAO.md) |
 
 ---
 
-## 🚀 Como Executar o Guia de Rust
+## 🚀 Como Visualizar os Guias
 
-O guia é uma aplicação web interativa independente, contida no arquivo HTML [`guias/rust/laboratorio-rust.html`](guias/rust/laboratorio-rust.html).
+Cada guia é uma aplicação web interativa independente, contida em um arquivo HTML. Não é necessário instalar Rust ou Flutter para visualizar o conteúdo.
 
 ### Opção 1: Servidor Local HTTP (Recomendado)
 
@@ -24,11 +25,13 @@ Iniciar um servidor HTTP local garante que fontes, scripts e recursos externos (
 No terminal, execute na raiz do projeto:
 
 ```bash
-python3 -m http.server 8000
+python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
 Abra o navegador no endereço:
-👉 **[http://localhost:8000/guias/rust/laboratorio-rust.html](http://localhost:8000/guias/rust/laboratorio-rust.html)**
+
+- **Rust:** [http://localhost:8000/guias/rust/laboratorio-rust.html](http://localhost:8000/guias/rust/laboratorio-rust.html)
+- **Flutter:** [http://localhost:8000/guias/flutter/guia-flutter-ia.html](http://localhost:8000/guias/flutter/guia-flutter-ia.html)
 
 #### Com Node.js / npx
 ```bash
@@ -36,7 +39,7 @@ npx serve .
 ```
 
 #### Com Live Server (VS Code / Antigravity IDE)
-1. Clique com o botão direito no arquivo `guias/rust/laboratorio-rust.html`.
+1. Clique com o botão direito no arquivo HTML do guia desejado.
 2. Selecione **Open with Live Server**.
 
 ---
@@ -61,6 +64,8 @@ Start-Process "guias\rust\laboratorio-rust.html"
 ```
 
 Ou simplesmente dê duplo-clique no arquivo através do gerenciador de arquivos.
+
+Os comandos acima abrem o laboratório Rust. Para Flutter, use o caminho `guias/flutter/guia-flutter-ia.html`; consulte também as [instruções específicas do guia](guias/flutter/README.md).
 
 ---
 
@@ -111,7 +116,21 @@ maturin develop --release
 
 ---
 
-## 🎯 Recursos do Laboratório
+## 📱 Exemplos e Validação do Guia de Flutter
+
+O módulo 0 contém exemplos executáveis de softmax e temperatura em Dart puro, Python com NumPy e Go. O HTML também oferece comparação entre thread principal e Web Worker, busca, glossário, tema, progresso, três quizzes, download de notebook e exportação Markdown/PDF.
+
+Veja os pré-requisitos e os comandos na [documentação de Flutter](guias/flutter/README.md). O [relatório de validação](guias/flutter/VALIDACAO.md) registra as correções e limitações. Para repetir os testes com `uv` e Chrome/Chromium instalado:
+
+```bash
+uv run guias/flutter/validar_guia.py
+```
+
+Os módulos 1 a 13 ainda são planejamentos, incluindo a criação do aplicativo Flutter e do proxy de IA em Go.
+
+---
+
+## 🎯 Recursos do Laboratório Rust
 
 - **Abas Comparativas**: Alterne entre implementações em **Python** e **Rust** com um clique.
 - **Simuladores Embutidos**:
