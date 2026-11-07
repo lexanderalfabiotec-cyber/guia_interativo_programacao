@@ -1,0 +1,2232 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Flutter com IA no bolso</title>
+<meta name="description" content="Guia interativo de Flutter e Dart em que cada conceito vem com uma aplicação de IA: API, modelos no celular, RAG, agentes e MLOps mobile.">
+<script>try{var t=JSON.parse(localStorage.getItem('fia:theme'));if(t==='dark'||t==='light')document.documentElement.setAttribute('data-theme',t);}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Mono:wght@400;600&family=Atkinson+Hyperlegible+Next:ital,wght@0,400;0,600;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   Tokens. Duas cores têm significado no guia inteiro:
+   --device (verde-azulado) = roda no aparelho
+   --cloud  (âmbar)         = vai para a nuvem
+   --jank   (vermelho)      = pegadinha, travada, erro
+   ========================================================= */
+:root{
+  --paper:#F4F6F9; --surface:#FFFFFF; --sunken:#E8ECF2; --ink:#1A2233; --muted:#566079; --line:#D7DCE5;
+  --link:#1F55B8; --focus:#2F5BD3; --note:#2F5BD3;
+  --device:#0B7C7E; --device-soft:#DCF0EF; --cloud:#975A00; --cloud-soft:#F6E8D2; --jank:#B8322B; --jank-soft:#F8E0DE;
+  --grid:rgba(26,34,51,.05);
+  --code-bg:#EDF0F5; --code-ink:#1A2233;
+  --hl-kw:#7A3EB1; --hl-str:#0B6E4F; --hl-num:#A4410F; --hl-com:#69728A; --hl-fn:#1F5FB8; --hl-type:#875800; --hl-meta:#B8322B;
+  --shadow:0 12px 32px rgba(16,24,40,.16);
+  --f-display:"Bricolage Grotesque", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-body:"Atkinson Hyperlegible Next", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --f-mono:"Atkinson Hyperlegible Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --top-h:60px; --side-w:300px; --measure:72ch;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#11151D; --surface:#171D28; --sunken:#0E131B; --ink:#E5E9F0; --muted:#9CA6B8; --line:#283142;
+    --link:#8DB4FF; --focus:#8DB4FF; --note:#8DB4FF;
+    --device:#45C8C5; --device-soft:#11302F; --cloud:#E6A64C; --cloud-soft:#33270F; --jank:#F2776E; --jank-soft:#3A1D1B;
+    --grid:rgba(229,233,240,.05);
+    --code-bg:#0E131C; --code-ink:#E2E6EE;
+    --hl-kw:#CBA6F7; --hl-str:#86D9AE; --hl-num:#F4A974; --hl-com:#7E899E; --hl-fn:#8DB8FF; --hl-type:#E9C46A; --hl-meta:#F2776E;
+    --shadow:0 12px 32px rgba(0,0,0,.45);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#11151D; --surface:#171D28; --sunken:#0E131B; --ink:#E5E9F0; --muted:#9CA6B8; --line:#283142;
+  --link:#8DB4FF; --focus:#8DB4FF; --note:#8DB4FF;
+  --device:#45C8C5; --device-soft:#11302F; --cloud:#E6A64C; --cloud-soft:#33270F; --jank:#F2776E; --jank-soft:#3A1D1B;
+  --grid:rgba(229,233,240,.05);
+  --code-bg:#0E131C; --code-ink:#E2E6EE;
+  --hl-kw:#CBA6F7; --hl-str:#86D9AE; --hl-num:#F4A974; --hl-com:#7E899E; --hl-fn:#8DB8FF; --hl-type:#E9C46A; --hl-meta:#F2776E;
+  --shadow:0 12px 32px rgba(0,0,0,.45);
+  color-scheme:dark;
+}
+
+/* ---------- base ---------- */
+*,*::before,*::after{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-behavior:smooth;scroll-padding-top:calc(var(--top-h) + 16px);-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.65 var(--f-body);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+a{color:var(--link);text-underline-offset:2px}
+:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:4px}
+p,li,dd{max-width:var(--measure)}
+strong,b{font-weight:700}
+.vh{position:absolute!important;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+.skip{position:absolute;left:12px;top:-80px;z-index:100;background:var(--ink);color:var(--paper);padding:8px 12px;border-radius:8px}
+.skip:focus{top:12px}
+@media (prefers-reduced-motion: reduce){html{scroll-behavior:auto}*,*::before,*::after{transition-duration:.01ms!important;animation-duration:.01ms!important}}
+
+/* ---------- barra do topo ---------- */
+.topbar{position:sticky;top:0;z-index:40;height:var(--top-h);display:flex;align-items:center;gap:12px;padding:0 16px;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.brand{display:flex;align-items:center;gap:10px;color:var(--ink);text-decoration:none;font:800 1.05rem/1 var(--f-display);letter-spacing:-.01em;white-space:nowrap}
+.brand svg{flex:none}
+.search{position:relative;flex:1;max-width:520px;margin-left:auto}
+.search input{width:100%;height:40px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;padding:0 40px 0 38px;font:inherit;font-size:.95rem}
+.search input::placeholder{color:var(--muted)}
+.search .s-icon{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.search kbd{position:absolute;right:9px;top:50%;transform:translateY(-50%);font:600 .75rem var(--f-mono);color:var(--muted);border:1px solid var(--line);border-radius:5px;padding:1px 6px;background:var(--paper)}
+#search-results{position:absolute;top:46px;left:0;right:0;max-height:min(62vh,520px);overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:6px;z-index:50}
+.result{display:block;padding:9px 11px;border-radius:8px;color:var(--ink);text-decoration:none}
+.result:hover,.result:focus{background:var(--sunken);outline:none}
+.result .r-where{display:block;font-size:.78rem;color:var(--muted)}
+.result .r-title{display:block;font-weight:700}
+.result .r-snip{display:block;font-size:.85rem;color:var(--muted);margin-top:2px}
+.result mark,.search-empty mark{background:var(--device-soft);color:inherit;border-radius:3px;padding:0 2px}
+.search-empty{padding:10px 12px;color:var(--muted);font-size:.9rem;margin:0}
+.btn-icon{height:40px;min-width:40px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:9px;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 11px;cursor:pointer;font:600 .88rem var(--f-body)}
+.btn-icon:hover{background:var(--sunken)}
+#menu-btn{display:none}
+.progress{display:flex;align-items:center;gap:9px;font-size:.82rem;color:var(--muted);white-space:nowrap}
+.progress .bar{width:78px;height:6px;border-radius:3px;background:var(--sunken);overflow:hidden;border:1px solid var(--line)}
+.progress .bar i{display:block;height:100%;width:calc(var(--p,0) * 100%);background:var(--device);transition:width .3s ease}
+
+/* ---------- layout ---------- */
+.layout{display:grid;grid-template-columns:var(--side-w) minmax(0,1fr)}
+#sidebar{position:sticky;top:var(--top-h);height:calc(100vh - var(--top-h));overflow:auto;border-right:1px solid var(--line);padding:20px 14px 28px 16px;background:var(--paper)}
+main{padding:0 clamp(16px,4vw,56px) 120px;min-width:0}
+.content{max-width:840px}
+#scrim{display:none}
+
+/* ---------- sumário lateral ---------- */
+.toc-title{font:800 1rem/1.2 var(--f-display);margin:0 0 12px 6px}
+#toc-list{list-style:none;margin:0;padding:0}
+.toc-ch{margin:1px 0}
+.toc-row{display:flex;align-items:flex-start;gap:8px;padding:5px 6px;border-radius:7px}
+.toc-row input{margin:4px 0 0;width:15px;height:15px;accent-color:var(--device);flex:none}
+.toc-row .spacer{width:15px;flex:none}
+.toc-row a{color:var(--ink);text-decoration:none;font-size:.92rem;line-height:1.35;flex:1}
+.toc-row .n{display:inline-block;min-width:1.7em;color:var(--muted);font-weight:600}
+.toc-ch.active>.toc-row{background:var(--sunken)}
+.toc-ch.done>.toc-row a{color:var(--muted)}
+.toc-ch ol{list-style:none;margin:3px 0 8px 29px;padding:0;display:none}
+.toc-ch.active ol{display:block}
+.toc-ch ol a{display:block;font-size:.84rem;line-height:1.35;color:var(--muted);text-decoration:none;padding:4px 8px;border-left:2px solid var(--line)}
+.toc-ch ol a:hover{color:var(--ink)}
+.toc-ch ol a[aria-current]{color:var(--ink);border-left-color:var(--device);font-weight:600}
+.side-tools{margin-top:20px;padding-top:16px;border-top:1px solid var(--line);display:grid;gap:8px}
+.side-tools .btn-icon{justify-content:flex-start;width:100%}
+.side-note{font-size:.78rem;color:var(--muted);margin:2px 4px 0;line-height:1.45}
+
+/* ---------- abertura ---------- */
+.hero{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(290px,.9fr);gap:clamp(28px,4vw,56px);align-items:center;padding:56px 0 48px;border-bottom:1px solid var(--line);max-width:1100px}
+h1{font:800 clamp(2.4rem,5vw,3.7rem)/1.02 var(--f-display);letter-spacing:-.03em;margin:0 0 20px}
+.lede{font-size:1.16rem;line-height:1.55;color:var(--muted);max-width:46ch;margin:0 0 16px}
+.legend{font-size:.95rem;margin:0 0 22px}
+.hero-links{display:flex;flex-wrap:wrap;gap:10px}
+.hero-links a{display:inline-flex;align-items:center;height:42px;padding:0 16px;border-radius:10px;font-weight:700;text-decoration:none;border:1.5px solid var(--ink);color:var(--ink)}
+.hero-links a.primary{background:var(--ink);color:var(--paper)}
+
+/* demo da thread principal x isolate */
+.demo{background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:20px}
+.demo-title{font:800 1.12rem/1.25 var(--f-display);margin:0 0 6px}
+.demo-sub{font-size:.9rem;color:var(--muted);margin:0 0 16px}
+.phone{width:min(260px,100%);margin:0 auto;border:2px solid var(--ink);border-radius:30px;padding:12px 12px 16px;background:var(--paper)}
+.phone-top{display:flex;justify-content:space-between;align-items:center;font-size:.74rem;color:var(--muted);margin:0 4px 10px}
+.spin-wrap{display:flex;align-items:center;gap:6px}
+#demo-spinner{width:18px;height:18px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--device);will-change:transform}
+#demo-frame{font-variant-numeric:tabular-nums;min-width:4ch;text-align:right}
+.bubble{padding:8px 11px;border-radius:14px;font-size:.88rem;line-height:1.4;margin:6px 0;max-width:92%}
+.bubble.user{background:var(--ink);color:var(--paper);margin-left:auto;border-bottom-right-radius:4px;width:max-content}
+.bubble.bot{background:var(--surface);border:1px solid var(--line);border-bottom-left-radius:4px;min-height:4.2em}
+.bubble.bot:empty::before{content:"Toque num dos botões abaixo";color:var(--muted)}
+.meter{margin-top:14px}
+#demo-meter{width:100%;height:64px;display:block;background:var(--sunken);border-radius:9px;border:1px solid var(--line)}
+.meter-stats{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:.8rem;color:var(--muted);margin-top:6px}
+.meter-stats b{color:var(--ink);font-variant-numeric:tabular-nums}
+.demo-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.btn{border-radius:10px;padding:10px 12px;font:700 .9rem/1.25 var(--f-body);cursor:pointer;border:1.5px solid}
+.btn.jank{border-color:var(--jank);color:var(--jank);background:var(--jank-soft)}
+.btn.device{border-color:var(--device);color:var(--device);background:var(--device-soft)}
+.btn:disabled{opacity:.5;cursor:progress}
+#demo-status{font-size:.9rem;margin:12px 0 0;min-height:3em}
+#demo-status.jank{color:var(--jank)} #demo-status.device{color:var(--device)}
+.demo-foot{font-size:.8rem;color:var(--muted);margin:10px 0 0}
+
+/* ---------- capítulos e seções ---------- */
+section.chapter{padding-top:56px}
+section.chapter + section.chapter{border-top:1px solid var(--line);margin-top:24px}
+h2{font:800 clamp(1.75rem,3.2vw,2.3rem)/1.12 var(--f-display);letter-spacing:-.02em;margin:0 0 14px}
+h2 .num{color:var(--muted);font-weight:600;margin-right:.35em}
+h3{font:800 1.32rem/1.3 var(--f-display);letter-spacing:-.01em;margin:44px 0 10px}
+h4{font:700 1rem/1.3 var(--f-body);margin:0 0 6px}
+.chapter-intro{font-size:1.07rem}
+.status{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:.88rem;color:var(--muted);margin:0 0 10px}
+.badge{display:inline-block;font:700 .76rem/1.7 var(--f-body);padding:0 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted);vertical-align:.1em;white-space:nowrap}
+.badge.device{color:var(--device);background:var(--device-soft);border-color:transparent}
+.badge.cloud{color:var(--cloud);background:var(--cloud-soft);border-color:transparent}
+.badge.ready{color:var(--paper);background:var(--ink);border-color:transparent}
+.badge.os{color:var(--ink)}
+
+/* blocos fixos de cada seção */
+.block{margin:22px 0;padding:14px 18px;background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:0 12px 12px 0}
+.block>*:last-child{margin-bottom:0}
+.block p{margin:0 0 10px}
+.block.tldr{border-left-color:var(--ink);font-size:1.04rem}
+.block.math{border-left-color:var(--muted);background-color:var(--surface);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:22px 22px}
+.block.trap{border-left-color:var(--jank)} .block.trap h4{color:var(--jank)}
+.block.note{border-left-color:var(--note)} .block.note h4{color:var(--note)}
+.block.cases{border-left-color:var(--device)}
+.block ul,.block ol{margin:0 0 10px;padding-left:22px}
+.formula{font:600 1.04rem/1.5 var(--f-mono);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:10px 14px;overflow-x:auto;white-space:nowrap;max-width:none}
+.symbols{display:grid;grid-template-columns:max-content 1fr;gap:4px 14px;margin:10px 0;font-size:.95rem}
+.symbols dt{font-family:var(--f-mono);font-weight:600}
+.symbols dd{margin:0}
+.plan-list{padding-left:22px;margin:8px 0 0}
+.plan-list li{margin:5px 0}
+.docs-links{font-size:.92rem;color:var(--muted)}
+.docs-links a{white-space:nowrap}
+
+/* termos do glossário */
+a.term{color:inherit;text-decoration:underline dotted;text-decoration-color:var(--muted);text-decoration-thickness:1.5px;text-underline-offset:3px;cursor:help}
+a.term:hover{text-decoration-color:var(--ink)}
+#tip{position:absolute;z-index:60;max-width:min(340px,calc(100vw - 24px));background:var(--ink);color:var(--paper);padding:11px 13px;border-radius:11px;font-size:.87rem;line-height:1.45;box-shadow:var(--shadow)}
+#tip strong{display:block;font:800 .98rem var(--f-display)}
+#tip p{margin:4px 0 0}
+#tip .an{opacity:.82}
+#tip a{color:inherit}
+
+/* código */
+figure.code{margin:0 0 12px;display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:6px 10px}
+figure.code>figcaption{font-size:.87rem;color:var(--muted);line-height:1.4}
+figure.code>pre{grid-column:1/-1}
+.code-tools{display:flex;gap:6px;justify-content:flex-end}
+.code-tools button{font:700 .78rem var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:7px;padding:5px 10px;cursor:pointer;white-space:nowrap}
+.code-tools button:hover{background:var(--sunken)}
+pre{margin:0;background:var(--code-bg);color:var(--code-ink);border:1px solid var(--line);border-radius:11px;padding:14px 16px;overflow-x:auto;font:400 .86rem/1.6 var(--f-mono);tab-size:2}
+pre code{font-size:inherit;background:none;padding:0}
+code{font-family:var(--f-mono);font-size:.9em}
+:not(pre)>code{background:var(--sunken);padding:1px 5px;border-radius:5px}
+pre.output{background:var(--surface);border-style:dashed;font-size:.82rem}
+.out-label{grid-column:1/-1;font-size:.8rem;color:var(--muted);margin:4px 0 -2px}
+.code-tabs{margin:20px 0;border:1px solid var(--line);border-radius:14px;background:var(--surface);padding:6px 14px 14px}
+.tablist{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:0 -14px 12px;padding:0 10px;overflow-x:auto}
+.tablist button{border:0;background:none;padding:10px 12px 9px;font:700 .9rem var(--f-body);color:var(--muted);border-bottom:2.5px solid transparent;cursor:pointer;margin-bottom:-1px;white-space:nowrap}
+.tablist button:hover{color:var(--ink)}
+.tablist button[aria-selected="true"]{color:var(--ink);border-bottom-color:var(--ink)}
+.code-tabs figure.code{margin:0}
+/* realce de sintaxe (classes do highlight.js, cores nossas) */
+.hljs-keyword,.hljs-selector-tag,.hljs-built_in{color:var(--hl-kw)}
+.hljs-string,.hljs-regexp,.hljs-template-string{color:var(--hl-str)}
+.hljs-number,.hljs-literal{color:var(--hl-num)}
+.hljs-comment,.hljs-quote{color:var(--hl-com);font-style:italic}
+.hljs-title,.hljs-title.function_,.hljs-section{color:var(--hl-fn)}
+.hljs-type,.hljs-title.class_,.hljs-class{color:var(--hl-type)}
+.hljs-meta,.hljs-symbol,.hljs-variable.language_{color:var(--hl-meta)}
+.hljs-subst,.hljs-params{color:inherit}
+
+/* tabelas */
+.table-wrap{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{border-collapse:collapse;width:100%;font-size:.92rem;line-height:1.45}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:700;background:var(--sunken)}
+tbody tr:last-child td{border-bottom:0}
+td.r,th.r{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+tr.sum td{font-weight:700}
+
+/* diagramas */
+figure.diagram{margin:22px 0;padding:16px;border:1px solid var(--line);border-radius:14px;background:var(--surface);overflow-x:auto}
+figure.diagram>figcaption{font-size:.87rem;color:var(--muted);margin-top:10px}
+pre.mermaid-src{background:var(--paper)}
+.mm-out svg{display:block;max-width:100%;height:auto;margin:0 auto}
+.mm-dark{display:none}
+:root[data-theme="dark"] .mm-light{display:none}
+:root[data-theme="dark"] .mm-dark{display:block}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .mm-light{display:none}:root:not([data-theme="light"]) .mm-dark{display:block}}
+.mm-light .node.device rect,.mm-light .node.device polygon{fill:#DCF0EF!important;stroke:#0B7C7E!important}
+.mm-light .node.cloud rect,.mm-light .node.cloud polygon{fill:#F6E8D2!important;stroke:#975A00!important}
+.mm-light .node.both rect{fill:#FFFFFF!important;stroke:#1A2233!important;stroke-dasharray:5 3}
+.mm-dark .node.device rect,.mm-dark .node.device polygon{fill:#11302F!important;stroke:#45C8C5!important}
+.mm-dark .node.cloud rect,.mm-dark .node.cloud polygon{fill:#33270F!important;stroke:#E6A64C!important}
+.mm-dark .node.both rect{fill:#171D28!important;stroke:#E5E9F0!important;stroke-dasharray:5 3}
+
+/* quiz */
+.quiz{margin:26px 0;padding:16px 18px;border:1px solid var(--line);border-radius:14px;background:var(--surface)}
+.q+.q{margin-top:18px;padding-top:16px;border-top:1px dashed var(--line)}
+.q-text{font-weight:600;margin:0 0 8px}
+.q-options{list-style:upper-alpha;margin:0;padding-left:26px;display:grid;gap:6px}
+.q-options li{max-width:none}
+.q-options li::marker{color:var(--muted);font-weight:700}
+.opt{width:100%;text-align:left;border:1px solid var(--line);background:var(--paper);color:var(--ink);border-radius:9px;padding:7px 11px;font:inherit;font-size:.95rem;line-height:1.4;cursor:pointer}
+.opt:hover{border-color:var(--muted)}
+li.right .opt{border-color:var(--device);background:var(--device-soft)}
+li.wrong .opt{border-color:var(--jank);background:var(--jank-soft)}
+.q-feedback{font-weight:700;margin:8px 0 0;min-height:1.4em}
+.q-feedback.ok{color:var(--device)} .q-feedback.no{color:var(--jank)}
+details{margin-top:8px}
+summary{cursor:pointer;font-weight:700;color:var(--link)}
+details p{margin:6px 0 0}
+
+/* concluí o módulo */
+.done-check{display:inline-flex;gap:10px;align-items:center;margin:36px 0 0;padding:12px 16px;border:1.5px dashed var(--line);border-radius:11px;font-weight:700;cursor:pointer}
+.done-check input{width:18px;height:18px;accent-color:var(--device)}
+
+/* glossário */
+.g-letters{display:flex;flex-wrap:wrap;gap:6px;margin:12px 0 18px}
+.g-letters a{min-width:34px;text-align:center;padding:4px 8px;border:1px solid var(--line);border-radius:7px;text-decoration:none;color:var(--ink);font-weight:700;background:var(--surface)}
+#glossario-lista{margin:0}
+.g-entry{padding:13px 12px;margin:0 -12px;border-bottom:1px solid var(--line);border-radius:8px}
+.g-entry:target{background:var(--device-soft)}
+.g-entry dt{font:800 1.08rem/1.3 var(--f-display)}
+.g-entry dd{margin:4px 0 0}
+.g-def,.g-analogy,.g-where{margin:0}
+.g-analogy{color:var(--muted);margin-top:4px}
+.g-where{font-size:.88rem;margin-top:4px}
+
+/* avisos flutuantes */
+#back-btn{position:fixed;right:16px;bottom:16px;z-index:50;box-shadow:var(--shadow)}
+#toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:11px 15px;border-radius:11px;font-size:.92rem;z-index:70;max-width:min(92vw,560px);box-shadow:var(--shadow)}
+
+/* ---------- telas menores ---------- */
+@media (max-width:1180px){.hero{grid-template-columns:1fr}.demo{max-width:560px}}
+@media (max-width:920px){
+  .layout{grid-template-columns:1fr}
+  #sidebar{position:fixed;left:0;top:var(--top-h);bottom:0;width:min(330px,88vw);height:auto;transform:translateX(-105%);transition:transform .22s ease;z-index:45;box-shadow:var(--shadow)}
+  body.nav-open #sidebar{transform:none}
+  body.nav-open #scrim{display:block;position:fixed;inset:var(--top-h) 0 0 0;background:rgba(10,14,22,.4);z-index:44}
+  #menu-btn{display:inline-flex}
+  .progress .p-text{display:none}
+}
+@media (max-width:640px){
+  :root{--top-h:108px}
+  .topbar{flex-wrap:wrap;height:var(--top-h);align-content:center;row-gap:8px;padding:8px 16px}
+  .search{order:9;flex-basis:100%;max-width:none;margin-left:0}
+  .search kbd{display:none}
+  .brand .b-long{display:none}
+  .topbar-right{margin-left:auto}
+  body{font-size:16px}
+  main{padding:0 16px 96px}
+  .hero{padding-top:32px}
+  .demo{padding:16px}
+  .block{padding:12px 14px}
+  .code-tabs{padding:4px 10px 12px}
+  .tablist{margin:0 -10px 10px}
+}
+@media (max-width:380px){.demo-actions{grid-template-columns:1fr}}
+.topbar-right{display:flex;align-items:center;gap:10px}
+
+/* ---------- impressão / PDF ---------- */
+@media print{
+  :root,:root[data-theme="dark"]{
+    --paper:#FFFFFF; --surface:#FFFFFF; --sunken:#F1F3F6; --ink:#111827; --muted:#4B5563; --line:#CBD2DC;
+    --link:#1F3F8F; --note:#1F3F8F; --device:#0B6A6C; --device-soft:#E3F2F1; --cloud:#7A4A00; --cloud-soft:#F7ECDA; --jank:#9F2A24; --jank-soft:#F9E5E3;
+    --grid:transparent; --code-bg:#F5F6F8; --code-ink:#111827;
+    --hl-kw:#5B2A8A; --hl-str:#0B5A40; --hl-num:#8A360C; --hl-com:#5B6475; --hl-fn:#1A4E99; --hl-type:#6E4800; --hl-meta:#9F2A24;
+    color-scheme:light;
+  }
+  @page{margin:16mm 15mm}
+  body{font-size:11pt;background:#fff}
+  .topbar,#sidebar,#scrim,.demo,.code-tools,.tablist,.done-check,#tip,#toast,#back-btn,.hero-links,.skip,.q-feedback,.no-print{display:none!important}
+  .layout{display:block}
+  main{padding:0}
+  .content,.hero{max-width:none}
+  .hero{display:block;padding:0 0 12mm;border:0}
+  section.chapter{break-before:page;padding-top:0;border-top:0!important;margin-top:0!important}
+  h2,h3,h4{break-after:avoid}
+  figure.diagram,.quiz .q,.g-entry,tr,.formula,.block.tldr{break-inside:avoid}
+  .code-tabs{border:0;padding:0;background:none}
+  .code-tabs>figure.code[hidden]{display:grid!important;margin-top:10px}
+  pre{white-space:pre-wrap;word-break:break-word;border-color:#CBD2DC}
+  .mm-light{display:block!important}.mm-dark{display:none!important}
+  a{color:#1F3F8F}
+  a[href^="http"]::after{content:" (" attr(href) ")";font-size:.82em;color:#4B5563;word-break:break-all}
+  a.term{text-decoration:none}
+  .opt{border:1px solid #CBD2DC;background:#fff}
+  details>summary{list-style:none;color:#111827}
+}
+</style>
+</head>
+<body>
+<a class="skip" href="#conteudo">Pular para o conteúdo</a>
+
+<header class="topbar" data-noexport>
+  <button id="menu-btn" class="btn-icon" type="button" aria-controls="sidebar" aria-expanded="false" aria-label="Abrir sumário">
+    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+  </button>
+  <a class="brand" href="#inicio" aria-label="Flutter com IA no bolso, início">
+    <svg width="26" height="26" viewBox="0 0 26 26" aria-hidden="true"><rect x="6" y="1.5" width="14" height="23" rx="3.5" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="10.5" cy="13" r="1.6" fill="var(--device)"/><circle cx="13" cy="13" r="1.6" fill="currentColor" opacity=".55"/><circle cx="15.5" cy="13" r="1.6" fill="var(--cloud)"/></svg>
+    <span>Flutter com IA<span class="b-long"> no bolso</span></span>
+  </a>
+  <div class="search" role="search">
+    <svg class="s-icon" width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="m20 20-3.5-3.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    <label class="vh" for="search-input">Buscar no guia</label>
+    <input id="search-input" type="search" placeholder="Buscar: isolate, softmax, proxy…" autocomplete="off" aria-controls="search-results" aria-expanded="false">
+    <kbd aria-hidden="true">/</kbd>
+    <div id="search-results" role="listbox" aria-label="Resultados da busca" hidden></div>
+  </div>
+  <div class="topbar-right">
+    <div class="progress" id="progress" role="progressbar" aria-label="Módulos concluídos" aria-valuemin="0" aria-valuemax="14" aria-valuenow="0">
+      <span class="bar"><i></i></span><span class="p-text" id="progress-text">0 de 14</span>
+    </div>
+    <button id="theme-btn" class="btn-icon" type="button" aria-label="Mudar para o tema escuro">
+      <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3.5a8.5 8.5 0 0 1 0 17z" fill="currentColor"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="layout">
+  <aside id="sidebar" aria-label="Sumário e ferramentas" data-noexport>
+    <p class="toc-title">Sumário</p>
+    <nav aria-label="Sumário"><ol id="toc-list"></ol></nav>
+    <div class="side-tools">
+      <button id="export-md" class="btn-icon" type="button">
+        <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Exportar .md
+      </button>
+      <button id="print-btn" class="btn-icon" type="button">
+        <svg width="17" height="17" viewBox="0 0 24 24" aria-hidden="true"><path d="M7 9V4h10v5M7 17H5a1 1 0 0 1-1-1v-5a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v5a1 1 0 0 1-1 1h-2M7 14h10v6H7z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        Imprimir ou salvar PDF
+      </button>
+      <p class="side-note">Seu progresso e suas preferências ficam salvos neste navegador. Em aba anônima, somem ao fechar.</p>
+    </div>
+  </aside>
+  <div id="scrim" data-noexport></div>
+
+  <main id="conteudo">
+  <div class="content">
+
+  <!-- ===================== ABERTURA ===================== -->
+  <section class="hero" id="inicio">
+    <div>
+      <h1>Flutter com IA no bolso</h1>
+      <p class="lede">Guia de Flutter e Dart para quem já programa em Python, Go ou C#. Cada conceito chega com uma aplicação de IA de verdade: streaming de tokens, modelo rodando no celular, agente com ferramentas e o MLOps para manter tudo de pé.</p>
+      <p class="legend">Duas cores guiam a leitura: <span class="badge device">no aparelho</span> para o que roda no celular e <span class="badge cloud">na nuvem</span> para o que vai a um servidor.</p>
+      <div class="hero-links" data-noexport>
+        <a class="primary" href="#m0">Começar pelo módulo 0</a>
+        <a href="#mapa">Ver o mapa do guia</a>
+      </div>
+    </div>
+
+    <aside class="demo" id="demo" aria-labelledby="demo-title" data-noexport>
+      <p class="demo-title" id="demo-title">Teste em 10 segundos: por que o Isolate existe</p>
+      <p class="demo-sub">A <a class="term" href="#g-thread-ui">thread da UI</a> precisa entregar um quadro a cada 16,7 ms. Rode o mesmo "modelo" de 1,5 s nos dois lugares e observe a bolinha e o gráfico.</p>
+      <div class="phone">
+        <div class="phone-top"><span>Assistente</span><span class="spin-wrap"><span id="demo-spinner" aria-hidden="true"></span><span id="demo-frame" aria-hidden="true">0</span></span></div>
+        <div class="bubble user">Quanto gastei com mercado?</div>
+        <div class="bubble bot" id="demo-answer" aria-live="polite"></div>
+      </div>
+      <div class="meter">
+        <canvas id="demo-meter" width="520" height="128" role="img" aria-label="Gráfico do tempo de cada quadro; a linha marca 16,7 ms"></canvas>
+        <div class="meter-stats"><span>Maior travada: <b id="demo-max">0 ms</b></span><span>Quadros perdidos: <b id="demo-lost">0</b></span></div>
+      </div>
+      <div class="demo-actions">
+        <button class="btn jank" id="run-main" type="button">Rodar na thread principal</button>
+        <button class="btn device" id="run-iso" type="button">Rodar num Isolate</button>
+      </div>
+      <p id="demo-status" aria-live="polite"></p>
+      <p class="demo-foot">No navegador, quem faz o papel do <a class="term" href="#g-isolate">Isolate</a> é um Web Worker: outra linha de execução, memória separada, conversa por mensagens.</p>
+    </aside>
+  </section>
+
+  <!-- ===================== MAPA ===================== -->
+  <section class="chapter" id="mapa">
+    <h2>Mapa do guia</h2>
+    <p class="chapter-intro">São 14 módulos, do ambiente instalado até um assistente financeiro que funciona sem internet. A coluna do meio é a regra de ouro do guia: nenhum conceito de Flutter ou Dart aparece sem uma aplicação de IA ao lado.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Módulo</th><th>Flutter e Dart</th><th>IA no mesmo capítulo</th><th>Matemática</th></tr></thead>
+        <tbody>
+          <tr><td><a href="#m0">0. Comece aqui</a></td><td>Ambiente, versões, como ler o guia</td><td>Softmax e temperatura (seção-amostra)</td><td>Softmax, entropia</td></tr>
+          <tr><td><a href="#m1">1. Dart</a></td><td>Tipos, null safety, classes, async, Streams, Isolates</td><td>Ler resposta de LLM, streaming SSE, inferência fora da UI</td><td>p50 e p95, tokens/s, orçamento de quadro</td></tr>
+          <tr><td><a href="#m2">2. Flutter</a></td><td>Widgets, layout, navegação, estado, HTTP, formulários, persistência</td><td>Tela de chat, estado da conversa, sugestão de categoria, cache</td><td>Nenhuma (respira)</td></tr>
+          <tr><td><a href="#m3">3. IA via API</a></td><td>HTTP, Streams, JSON, tratamento de erro</td><td>Kimi e Qwen via proxy, streaming, tool calling, retry, custo</td><td>Backoff exponencial, custo por token</td></tr>
+          <tr><td><a href="#m4">4. Decisão no aparelho</a></td><td>Formulários, assets, testes</td><td>Árvore e gradient boosting rodando no app</td><td>Entropia, ganho de informação, precisão, recall, F1</td></tr>
+          <tr><td><a href="#m5">5. Visão e áudio</a></td><td>Câmera, permissões, plugins</td><td>OCR de recibo, detecção de objetos, transcrição</td><td>Taxa de erro por caractere, IoU</td></tr>
+          <tr><td><a href="#m6">6. SLM no celular</a></td><td>FFI, platform channels, Pigeon, Isolates</td><td>llama.cpp, LiteRT-LM, Gemini Nano, Foundation Models</td><td>Memória do modelo, quantização, KV cache</td></tr>
+          <tr><td><a href="#m7">7. Arquitetura híbrida</a></td><td>Arquitetura em camadas, conectividade</td><td>Roteador aparelho ou nuvem</td><td>Valor esperado, ponto de equilíbrio</td></tr>
+          <tr><td><a href="#m8">8. RAG no celular</a></td><td>SQLite, arquivos, Isolates</td><td>Embeddings e busca vetorial local</td><td>Similaridade de cosseno, recall@k</td></tr>
+          <tr><td><a href="#m9">9. Agentes no app</a></td><td>Permissões, agenda, notificações</td><td>Tool calling com guardrails</td><td>Nenhuma</td></tr>
+          <tr><td><a href="#m10">10. MLOps mobile</a></td><td>Flavors, downloads, configuração remota</td><td>OTA do modelo, teste A/B, drift, rollback</td><td>Teste de proporções, PSI</td></tr>
+          <tr><td><a href="#m11">11. Desempenho</a></td><td>DevTools, profile mode, tamanho do app</td><td>Delegates de GPU e NPU</td><td>Energia, quadros por segundo</td></tr>
+          <tr><td><a href="#m12">12. Segurança</a></td><td>Armazenamento seguro, ofuscação</td><td>Prompt injection, LGPD, modelo embarcado</td><td>Nenhuma</td></tr>
+          <tr><td><a href="#m13">13. Projeto final</a></td><td>Tudo junto</td><td>Assistente financeiro offline-first</td><td>As anteriores, aplicadas</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <figure class="diagram">
+      <pre class="mermaid-src"><code class="language-mermaid">flowchart TD
+  M0["0 Comece aqui"] --> M1["1 Dart"]
+  M1 --> M2["2 Flutter"]
+  M2 --> M3["3 IA via API"]
+  M2 --> M4["4 Decisão no aparelho"]
+  M2 --> M5["5 Visão e áudio"]
+  M1 --> M6["6 SLM no celular"]
+  M3 --> M7["7 Arquitetura híbrida"]
+  M6 --> M7
+  M7 --> M8["8 RAG no celular"]
+  M7 --> M9["9 Agentes no app"]
+  M4 &amp; M5 &amp; M8 &amp; M9 --> M10["10 MLOps mobile"]
+  M10 --> M11["11 Desempenho"]
+  M11 --> M12["12 Segurança"]
+  M12 --> M13["13 Projeto final"]
+  class M3 cloud
+  class M4,M5,M6,M8 device
+  class M7,M9,M10 both</code></pre>
+      <figcaption>Dependências entre módulos. Verde-azulado roda no aparelho, âmbar vai para a nuvem, tracejado mistura os dois.</figcaption>
+    </figure>
+
+    <h3 id="ordem-entrega">Ordem de entrega</h3>
+    <ol>
+      <li>Parte 1 (esta): mapa, esqueleto interativo, módulo 0 com a seção-amostra e o glossário inicial.</li>
+      <li>Parte 2: módulo 1, Dart.</li>
+      <li>Parte 3: módulo 2, Flutter.</li>
+      <li>Parte 4: módulo 3, IA via API.</li>
+      <li>Parte 5: módulo 4, decisão no aparelho.</li>
+      <li>Parte 6: módulo 5, visão e áudio.</li>
+      <li>Parte 7: módulo 6, SLM no celular.</li>
+      <li>Parte 8: módulos 7 e 8.</li>
+      <li>Parte 9: módulos 9 e 10.</li>
+      <li>Parte 10: módulos 11 e 12.</li>
+      <li>Parte 11: módulo 13 e o glossário completo revisado.</li>
+    </ol>
+  </section>
+
+  <!-- ===================== MÓDULO 0 ===================== -->
+  <section class="chapter" id="m0" data-track>
+    <h2><span class="num"><span class="vh">Módulo </span>0<span class="vh">:</span></span> Comece aqui</h2>
+    <p class="status"><span class="badge ready">pronto</span> Entregue na parte 1.</p>
+    <p class="chapter-intro">Como o guia funciona, que versões usamos, de onde vem o conteúdo e uma seção completa para você ver o padrão antes dos módulos chegarem.</p>
+
+    <section class="topic" id="m0-1">
+      <h3>0.1 Como usar este guia</h3>
+      <div class="block tldr"><h4>TL;DR</h4><p>Cada seção ensina um pedaço de Flutter ou Dart e, ali mesmo, usa esse pedaço em IA. Flutter é novidade? Leia na ordem. Já sabe o básico? Pule para o módulo que quiser.</p></div>
+      <p>A regra de ouro, em seis exemplos:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Conceito de Flutter ou Dart</th><th>Onde a IA entra</th><th>Módulo</th></tr></thead>
+          <tbody>
+            <tr><td>async/await e Streams</td><td>Streaming de tokens de um LLM via SSE</td><td><a href="#m1-4">1.4</a></td></tr>
+            <tr><td>Isolates</td><td>Inferência sem travar a UI (a demo lá do topo)</td><td><a href="#m1-5">1.5</a></td></tr>
+            <tr><td>FFI e platform channels</td><td>Chamar llama.cpp, LiteRT e as APIs de IA do sistema</td><td><a href="#m6-3">6.3</a></td></tr>
+            <tr><td>Gerência de estado</td><td>Estado de uma conversa com um agente</td><td><a href="#m2-3">2.3</a></td></tr>
+            <tr><td>Persistência local</td><td>Cache de embeddings e RAG offline</td><td><a href="#m8-3">8.3</a></td></tr>
+            <tr><td>Formulários</td><td>Classificador no aparelho que sugere a categoria do gasto</td><td><a href="#m2-5">2.5</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Os blocos que se repetem em toda seção:</p>
+      <ul>
+        <li><b>TL;DR</b>: o resumo em até três linhas, para quem está com pressa (todo mundo).</li>
+        <li><b>Matemática</b>, com fundo quadriculado: só quando ajuda, sempre com um exemplo resolvido passo a passo e cada símbolo explicado.</li>
+        <li><b>Código</b> em abas: A é o app (Dart ou Flutter), B é Python (treino, avaliação) ou Go (backend). A aba escolhida vale para o guia inteiro.</li>
+        <li><b>No mundo real</b>: pelo menos dois casos de bancos, varejo ou saúde.</li>
+        <li><b>Pegadinhas</b>, em vermelho: os erros que todo mundo comete uma vez.</li>
+        <li><b>Mini-quiz</b>: duas ou três perguntas com resposta revelável.</li>
+      </ul>
+      <p>Marcas de plataforma: <span class="badge device">no aparelho</span> <span class="badge cloud">na nuvem</span> <span class="badge os">só Android</span> <span class="badge os">só iOS</span>. Termos com sublinhado pontilhado, como <a class="term" href="#g-token">token</a>, mostram a definição ao passar o mouse ou tocar.</p>
+      <p>Atalhos: <kbd>/</kbd> abre a busca e <kbd>Esc</kbd> fecha o que estiver aberto. Para PDF, use "Imprimir ou salvar PDF" no sumário e escolha "Salvar como PDF". "Exportar .md" gera um Markdown com os diagramas em blocos Mermaid.</p>
+    </section>
+
+    <section class="topic" id="m0-2">
+      <h3>0.2 Versões, ambiente e avisos de atualização</h3>
+      <div class="block tldr"><h4>TL;DR</h4><p>Flutter 3.47 com Dart 3.13, Material como pacote separado, Riverpod 3, Python 3.12+ e Go 1.24+. Tutorial antigo que importa <code>package:flutter/material.dart</code> está ficando para trás.</p></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Ferramenta</th><th>Versão usada no guia</th><th>Onde conferir</th></tr></thead>
+          <tbody>
+            <tr><td>Flutter SDK</td><td>3.47.x (canal stable)</td><td><a href="https://docs.flutter.dev/release/release-notes">Notas de versão</a></td></tr>
+            <tr><td>Dart SDK</td><td>3.13.x (vem junto com o Flutter)</td><td><a href="https://dart.dev/guides/whats-new">Novidades do Dart</a></td></tr>
+            <tr><td>material_ui e cupertino_ui</td><td>1.x</td><td><a href="https://pub.dev/packages/material_ui">pub.dev/packages/material_ui</a></td></tr>
+            <tr><td>flutter_riverpod</td><td>3.x (versão exata fixada no módulo 2)</td><td><a href="https://pub.dev/packages/flutter_riverpod">pub.dev/packages/flutter_riverpod</a></td></tr>
+            <tr><td>Python</td><td>3.12 ou mais novo, com Jupyter no VS Code</td><td><a href="https://code.visualstudio.com/docs/datascience/jupyter-notebooks">Notebooks no VS Code</a></td></tr>
+            <tr><td>Go</td><td>1.24 ou mais novo</td><td><a href="https://go.dev/doc/devel/release">Versões do Go</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <p>Conferido em 7 de novembro de 2026. O Flutter 3.50 está programado para novembro de 2026; quando sair, esta tabela é revisada antes do módulo seguinte.</p>
+      <figure class="code">
+        <figcaption>Conferindo o ambiente no terminal</figcaption>
+        <pre><code class="language-bash">flutter --version   # Flutter 3.47.x, Dart 3.13.x
+flutter doctor      # lista o que falta: Android SDK, Xcode, licenças
+python3 --version   # 3.12 ou mais novo
+go version          # 1.24 ou mais novo</code></pre>
+      </figure>
+      <p>Para compilar para iOS você precisa de um Mac com Xcode <span class="badge os">só iOS</span>. Android funciona em Windows, Linux e macOS com o Android Studio instalado (ele traz o SDK e o emulador).</p>
+
+      <div class="block note">
+        <h4>Aviso de atualização: Material virou pacote</h4>
+        <p>A partir do Flutter 3.47, Material e Cupertino existem como pacotes independentes no pub.dev (<code>material_ui</code> e <code>cupertino_ui</code>), e as bibliotecas embutidas no SDK estão marcadas para depreciação no lançamento de novembro. Muito tutorial (e muita resposta de IA por aí) ainda usa o import antigo. Neste guia, o primeiro app já nasce com o pacote novo.</p>
+        <p>Projeto antigo? Um comando migra os imports: <code>dart fix --apply --code=migrate_design_widgets</code>. Fonte: <a href="https://docs.flutter.dev/release/breaking-changes/material-ui-and-cupertino-ui">guia de migração na docs.flutter.dev</a>.</p>
+      </div>
+      <div class="block note">
+        <h4>Aviso de atualização: nomes novos para coisas conhecidas</h4>
+        <ul>
+          <li>TensorFlow Lite agora se chama <a class="term" href="#g-litert">LiteRT</a>. Os arquivos <code>.tflite</code> continuam valendo.</li>
+          <li>Tutoriais de 2024 e 2025 usam a "MediaPipe LLM Inference API" para rodar LLMs no celular. A documentação atual do Google apresenta o LiteRT-LM como a camada de produção para isso, e aponta o pacote comunitário <code>flutter_gemma</code> para Flutter. O módulo 6 confere o estado de cada um antes de escrever código.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="topic" id="m0-3">
+      <h3>0.3 Fontes e materiais de apoio</h3>
+      <div class="block tldr"><h4>TL;DR</h4><p>A base é a documentação oficial (docs.flutter.dev, dart.dev, pub.dev e a documentação de cada provedor). Cada módulo lista os links que usou.</p></div>
+      <p>Nenhum livro anexado chegou junto com o pedido, só as instruções. Se você anexar livros ou apostilas, cada conceito tirado deles ganha a citação (obra, capítulo e página) no próprio bloco, e um aviso quando o material estiver atrás do ecossistema atual.</p>
+      <p>Da <a href="https://docs.flutter.dev/">docs.flutter.dev</a>, as seções que mais alimentam o guia:</p>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Seção da documentação</th><th>Módulos</th></tr></thead>
+          <tbody>
+            <tr><td><a href="https://docs.flutter.dev/ui/layout">Layout</a> e <a href="https://docs.flutter.dev/ui/layout/constraints">restrições</a></td><td>2</td></tr>
+            <tr><td><a href="https://docs.flutter.dev/data-and-backend/state-mgmt/options">Gerência de estado</a></td><td>2, 9</td></tr>
+            <tr><td><a href="https://docs.flutter.dev/data-and-backend/networking">Rede e HTTP</a> e <a href="https://docs.flutter.dev/data-and-backend/serialization/json">JSON</a></td><td>2, 3</td></tr>
+            <tr><td><a href="https://docs.flutter.dev/data-and-backend/persistence/choose-a-database">Persistência</a></td><td>2, 8</td></tr>
+            <tr><td><a href="https://docs.flutter.dev/perf/isolates">Concorrência e isolates</a></td><td>1, 6, 8</td></tr>
+            <tr><td><a href="https://docs.flutter.dev/interop">Interoperabilidade nativa</a> (FFI, Pigeon, platform channels)</td><td>6</td></tr>
+            <tr><td><a href="https://docs.flutter.dev/ai/best-practices">Boas práticas de IA</a> (prompts, saída estruturada, tool calls)</td><td>3, 6, 9</td></tr>
+            <tr><td><a href="https://docs.flutter.dev/app-architecture/guide">Arquitetura de apps</a></td><td>7, 13</td></tr>
+            <tr><td><a href="https://docs.flutter.dev/perf">Desempenho</a> e <a href="https://docs.flutter.dev/perf/app-size">tamanho do app</a></td><td>11</td></tr>
+            <tr><td><a href="https://docs.flutter.dev/deployment/obfuscate">Ofuscação</a> e <a href="https://docs.flutter.dev/deployment/flavors">flavors</a></td><td>10, 12</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== SEÇÃO-AMOSTRA: o padrão completo ========== -->
+    <section class="topic" id="m0-4">
+      <h3>0.4 Seção-amostra: softmax e temperatura</h3>
+      <p class="status"><span class="badge device">no aparelho</span><span class="badge cloud">na nuvem</span> Vale para SLM local e para API.</p>
+
+      <div class="block tldr"><h4>TL;DR</h4>
+        <p>O modelo não escolhe palavras: ele dá uma nota para cada <a class="term" href="#g-token">token</a> possível. O <a class="term" href="#g-softmax">softmax</a> transforma essas notas em probabilidades, e a <a class="term" href="#g-temperatura">temperatura</a> decide se o sorteio vai ser careta ou criativo.</p>
+      </div>
+
+      <h4>A ideia, sem fórmula</h4>
+      <ul>
+        <li>Um <a class="term" href="#g-llm">LLM</a> gera texto um token por vez. A cada passo, ele dá uma nota crua, o <a class="term" href="#g-logit">logit</a>, para cada token do vocabulário (dezenas de milhares deles).</li>
+        <li>O softmax converte essas notas em porcentagens que somam 100%.</li>
+        <li>Antes disso, todas as notas são divididas pela temperatura <em>T</em>. T baixa aumenta a distância entre o favorito e o resto. T alta aproxima todo mundo.</li>
+        <li>Por fim, um <a class="term" href="#g-amostragem">sorteio</a> escolhe o próximo token, que entra no texto, e o ciclo recomeça.</li>
+      </ul>
+      <p>Pense na temperatura como o café do modelo. Pouco café: ele responde igual à URA do banco. Café demais: começa a recitar poesia sobre boleto.</p>
+
+      <figure class="diagram">
+        <pre class="mermaid-src"><code class="language-mermaid">flowchart LR
+  A["Prompt"] --> B["Tokenizador"]
+  B --> C["Modelo"]
+  C --> D["Logits&lt;br/&gt;Pix 2,0 / TED 1,0 / boleto 0,1"]
+  D --> E["Divide por T"]
+  E --> F["Softmax"]
+  F --> G["Sorteio"]
+  G --> H["Próximo token"]
+  H -- "entra no contexto e repete" --> C</code></pre>
+        <figcaption>Geração de texto, um token por volta. A temperatura age entre os logits e o softmax.</figcaption>
+      </figure>
+
+      <div class="block math">
+        <h4>Matemática</h4>
+        <p>A fórmula do softmax com temperatura:</p>
+        <p class="formula">pᵢ = exp(zᵢ / T) ÷ Σⱼ exp(zⱼ / T)</p>
+        <dl class="symbols">
+          <dt>zᵢ</dt><dd>logit do token i (a nota crua; pode ser negativa)</dd>
+          <dt>T</dt><dd>temperatura, sempre maior que zero</dd>
+          <dt>exp(x)</dt><dd>o número e elevado a x; e ≈ 2,718 é a constante de Euler, a base "natural" de crescimento. exp nunca dá negativo, por isso serve para fazer probabilidade</dd>
+          <dt>Σⱼ</dt><dd>somatório: some o termo para todos os tokens j</dd>
+          <dt>pᵢ</dt><dd>probabilidade do token i, entre 0 e 1; somando todas dá 1</dd>
+        </dl>
+        <p><b>Passo a passo com T = 1.</b> Três candidatos para completar "Pagar com…":</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Token</th><th class="r">Logit z</th><th class="r">exp(z)</th><th class="r">p = exp(z) ÷ soma</th></tr></thead>
+            <tbody>
+              <tr><td>Pix</td><td class="r">2,0</td><td class="r">7,389</td><td class="r">0,659 (65,9%)</td></tr>
+              <tr><td>TED</td><td class="r">1,0</td><td class="r">2,718</td><td class="r">0,242 (24,2%)</td></tr>
+              <tr><td>boleto</td><td class="r">0,1</td><td class="r">1,105</td><td class="r">0,099 (9,9%)</td></tr>
+              <tr class="sum"><td>Soma</td><td class="r"></td><td class="r">11,213</td><td class="r">1,000</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p><b>Com T = 0,5</b>, primeiro divida: 2,0 ÷ 0,5 = 4; 1,0 ÷ 0,5 = 2; 0,1 ÷ 0,5 = 0,2. Os exp viram 54,598; 7,389 e 1,221, que somam 63,209. Logo Pix fica com 54,598 ÷ 63,209 = 86,4%.</p>
+        <p><b>Com T = 2</b>: 1; 0,5 e 0,05 viram 2,718; 1,649 e 1,051, soma 5,418. Pix cai para 50,2%.</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>T</th><th class="r">Pix</th><th class="r">TED</th><th class="r">boleto</th><th class="r">Entropia</th></tr></thead>
+            <tbody>
+              <tr><td>0,5</td><td class="r">86,4%</td><td class="r">11,7%</td><td class="r">1,9%</td><td class="r">0,655 bit</td></tr>
+              <tr><td>1,0</td><td class="r">65,9%</td><td class="r">24,2%</td><td class="r">9,9%</td><td class="r">1,222 bit</td></tr>
+              <tr><td>2,0</td><td class="r">50,2%</td><td class="r">30,4%</td><td class="r">19,4%</td><td class="r">1,481 bit</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>A <a class="term" href="#g-entropia">entropia</a> (H = −Σ p·log₂ p) mede o "sei lá" do modelo em bits. Com três opções, o máximo é log₂ 3 ≈ 1,585 bit, quando as três empatam. Ela volta no módulo 4, dentro das árvores de decisão.</p>
+        <p><b>O <a class="term" href="#g-truque-maximo">truque do máximo</a>.</b> exp(1000) estoura o float e a conta vira NaN. Subtraia o maior logit c de todos antes do exp: exp(zᵢ − c) ÷ Σ exp(zⱼ − c) = [exp(zᵢ)·exp(−c)] ÷ [exp(−c)·Σ exp(zⱼ)]. O exp(−c) aparece em cima e embaixo e se cancela: mesmo resultado, sem estouro.</p>
+      </div>
+
+      <div class="code-tabs">
+        <figure class="code" data-lang="dart" data-label="Dart">
+          <figcaption>Exemplo A: Dart puro, roda no DartPad. Calcula o softmax para três temperaturas e sorteia 1000 tokens.</figcaption>
+          <pre><code class="language-dart">// Exemplo A: softmax com temperatura em Dart puro.
+// Roda no DartPad (https://dartpad.dev): não depende de Flutter nem de plugin.
+// Escrito para Dart 3.13 (o que vem com o Flutter 3.47).
+
+import 'dart:math';
+
+/// Transforma logits (as notas cruas do modelo) em probabilidades.
+///
+/// Por que subtrair o maior valor antes do exp()?
+/// exp(1000) estoura para Infinity e a conta vira NaN.
+/// Subtrair a mesma constante de todos os logits não muda o resultado
+/// (ela se cancela na divisão), mas mantém os números pequenos.
+List&lt;double&gt; softmax(List&lt;double&gt; logits, {double temperature = 1.0}) {
+  if (temperature &lt;= 0) {
+    // T = 0 quer dizer "sempre o mais provável" (argmax).
+    // Dividir por zero não é estratégia, é bug.
+    throw ArgumentError.value(
+        temperature, 'temperature', 'use T &gt; 0; trate T = 0 como argmax');
+  }
+  // collection for: monta a lista já transformada, sem map().toList()
+  final scaled = [for (final z in logits) z / temperature];
+  // max de dart:math passado como função (tear-off)
+  final maior = scaled.reduce(max);
+  final exps = [for (final z in scaled) exp(z - maior)];
+  final soma = exps.reduce((a, b) =&gt; a + b);
+  return [for (final e in exps) e / soma];
+}
+
+/// Sorteia um índice respeitando as probabilidades (amostragem).
+int sortear(List&lt;double&gt; probs, Random rng) {
+  final r = rng.nextDouble(); // número entre 0 (inclusive) e 1 (exclusive)
+  var acumulado = 0.0;
+  for (var i = 0; i &lt; probs.length; i++) {
+    acumulado += probs[i];
+    if (r &lt; acumulado) return i;
+  }
+  return probs.length - 1; // proteção contra arredondamento (0,99999...)
+}
+
+void main() {
+  const tokens = ['Pix', 'TED', 'boleto'];
+  const logits = [2.0, 1.0, 0.1];
+
+  for (final t in [0.5, 1.0, 2.0]) {
+    final p = softmax(logits, temperature: t);
+    final linha = [
+      for (var i = 0; i &lt; tokens.length; i++)
+        '${tokens[i]} ${(p[i] * 100).toStringAsFixed(1)}%',
+    ].join('   ');
+    print('T = $t  -&gt;  $linha');
+  }
+
+  // Semente fixa: o mesmo sorteio toda vez.
+  // Ótimo para teste automatizado, péssimo para cassino.
+  final rng = Random(42);
+  final p = softmax(logits);
+  final contagem = List.filled(tokens.length, 0);
+  for (var i = 0; i &lt; 1000; i++) {
+    contagem[sortear(p, rng)]++;
+  }
+  print('1000 sorteios com T = 1.0: $contagem (ordem: $tokens)');
+}</code></pre>
+          <p class="out-label">Saída das três primeiras linhas. A quarta mostra a contagem do sorteio, perto de 659, 242 e 99 (os números exatos dependem do gerador do Dart).</p>
+          <pre class="output"><code class="language-plaintext">T = 0.5  -&gt;  Pix 86.4%   TED 11.7%   boleto 1.9%
+T = 1.0  -&gt;  Pix 65.9%   TED 24.2%   boleto 9.9%
+T = 2.0  -&gt;  Pix 50.2%   TED 30.4%   boleto 19.4%</code></pre>
+        </figure>
+        <figure class="code" data-lang="python" data-label="Python" data-ipynb="m0-softmax-temperatura.ipynb">
+          <figcaption>Exemplo B: notebook para o VS Code. Cada <code># %%</code> é uma célula; o botão gera o .ipynb.</figcaption>
+          <pre><code class="language-python"># %% [markdown]
+# # Softmax e temperatura
+# Exemplo B do módulo 0. No VS Code, com a extensão Jupyter instalada,
+# cada marcador `# %%` vira uma célula executável (ou clique em "Baixar .ipynb").
+# Requisitos: Python 3.12 ou mais novo e numpy (`pip install numpy`).
+
+# %%
+import numpy as np
+
+
+def softmax(logits, temperature: float = 1.0) -&gt; np.ndarray:
+    """Softmax numericamente estável: subtrai o máximo antes do exp."""
+    if temperature &lt;= 0:
+        raise ValueError("use T &gt; 0; trate T = 0 como argmax")
+    z = np.asarray(logits, dtype=np.float64) / temperature
+    z = z - z.max()  # truque do máximo: evita overflow em np.exp
+    e = np.exp(z)
+    return e / e.sum()
+
+
+tokens = ["Pix", "TED", "boleto"]
+logits = np.array([2.0, 1.0, 0.1])
+
+# %% [markdown]
+# ## Comparando temperaturas
+# T menor que 1 deixa a distribuição mais "pontuda" (modelo previsível).
+# T maior que 1 achata a distribuição (modelo mais solto e mais arriscado).
+
+# %%
+for t in (0.5, 1.0, 2.0):
+    p = softmax(logits, t)
+    print(f"T = {t}: " + "   ".join(f"{tok} {pi:.1%}" for tok, pi in zip(tokens, p)))
+
+# %% [markdown]
+# ## Entropia: o quanto o modelo está em dúvida
+# H = -Σ p·log2(p), medida em bits. Com 3 opções, o máximo é log2(3) ≈ 1,585 bit
+# (as três igualmente prováveis). Ela volta no módulo 4, nas árvores de decisão.
+
+# %%
+def entropia_bits(p: np.ndarray) -&gt; float:
+    p = p[p &gt; 0]  # por convenção, 0·log(0) conta como 0
+    return float(-(p * np.log2(p)).sum())
+
+
+for t in (0.5, 1.0, 2.0):
+    print(f"T = {t}: entropia = {entropia_bits(softmax(logits, t)):.3f} bit")
+print(f"máximo possível com 3 tokens: {np.log2(3):.3f} bit")
+
+# %% [markdown]
+# ## Sorteio reproduzível
+# Semente fixa = mesmo resultado em toda execução. Num harness de avaliação,
+# isso separa "o modelo piorou" de "deu azar no sorteio".
+
+# %%
+rng = np.random.default_rng(seed=42)
+amostras = rng.choice(len(tokens), size=1000, p=softmax(logits, 1.0))
+print({tok: int((amostras == i).sum()) for i, tok in enumerate(tokens)})
+
+# %% [markdown]
+# ## Prova do truque do máximo
+# Sem subtrair o máximo, logits grandes quebram a conta.
+
+# %%
+grandes = np.array([1000.0, 999.0, 998.0])
+with np.errstate(over="ignore", invalid="ignore"):
+    ingenuo = np.exp(grandes) / np.exp(grandes).sum()
+print("sem o truque:", ingenuo)
+print("com o truque:", softmax(grandes).round(3))</code></pre>
+          <p class="out-label">Saída:</p>
+          <pre class="output"><code class="language-plaintext">T = 0.5: Pix 86.4%   TED 11.7%   boleto 1.9%
+T = 1.0: Pix 65.9%   TED 24.2%   boleto 9.9%
+T = 2.0: Pix 50.2%   TED 30.4%   boleto 19.4%
+T = 0.5: entropia = 0.655 bit
+T = 1.0: entropia = 1.222 bit
+T = 2.0: entropia = 1.481 bit
+máximo possível com 3 tokens: 1.585 bit
+{'Pix': 659, 'TED': 243, 'boleto': 98}
+sem o truque: [nan nan nan]
+com o truque: [0.665 0.245 0.09 ]</code></pre>
+        </figure>
+        <figure class="code" data-lang="go" data-label="Go">
+          <figcaption>Exemplo B: Go, como vai morar no backend proxy do módulo 3, já com a política de temperatura.</figcaption>
+          <pre><code class="language-go">// Exemplo B: o mesmo softmax em Go, do jeito que ele aparece no backend proxy
+// do módulo 3. Roda no Go Playground (https://go.dev/play): só biblioteca padrão.
+// Testado com Go 1.24.
+package main
+
+import (
+	"errors"
+	"fmt"
+	"math"
+)
+
+// Política que o proxy aplica ANTES de repassar o pedido ao provedor.
+// Por quê: quem manda é o servidor. Um app adulterado poderia pedir T = 5
+// e transformar o seu assistente financeiro num poeta concretista.
+const (
+	minTemperature = 0.0 // 0 = o provedor escolhe sempre o token mais provável
+	maxTemperature = 1.0 // teto para respostas sobre dinheiro
+)
+
+// clampTemperature prende a temperatura pedida dentro da política.
+func clampTemperature(t float64) float64 {
+	return math.Min(math.Max(t, minTemperature), maxTemperature)
+}
+
+// softmax com o truque do máximo para não estourar math.Exp.
+func softmax(logits []float64, temperature float64) ([]float64, error) {
+	if temperature &lt;= 0 {
+		return nil, errors.New("use T &gt; 0; trate T = 0 como argmax")
+	}
+	maior := math.Inf(-1)
+	for _, z := range logits {
+		maior = math.Max(maior, z/temperature)
+	}
+	probs := make([]float64, len(logits))
+	soma := 0.0
+	for i, z := range logits {
+		probs[i] = math.Exp(z/temperature - maior)
+		soma += probs[i]
+	}
+	for i := range probs {
+		probs[i] /= soma
+	}
+	return probs, nil
+}
+
+func main() {
+	tokens := []string{"Pix", "TED", "boleto"}
+	logits := []float64{2.0, 1.0, 0.1}
+
+	for _, t := range []float64{0.5, 1.0, 2.0} {
+		p, err := softmax(logits, t)
+		if err != nil {
+			fmt.Println("erro:", err)
+			return
+		}
+		fmt.Printf("T = %.1f  -&gt;", t)
+		for i, tok := range tokens {
+			fmt.Printf("   %s %.1f%%", tok, p[i]*100)
+		}
+		fmt.Println()
+	}
+
+	// Pedido vindo do app com temperatura exagerada:
+	fmt.Printf("pedido com T = 1.8 sai do proxy com T = %.1f\n", clampTemperature(1.8))
+}</code></pre>
+          <p class="out-label">Saída:</p>
+          <pre class="output"><code class="language-plaintext">T = 0.5  -&gt;   Pix 86.4%   TED 11.7%   boleto 1.9%
+T = 1.0  -&gt;   Pix 65.9%   TED 24.2%   boleto 9.9%
+T = 2.0  -&gt;   Pix 50.2%   TED 30.4%   boleto 19.4%
+pedido com T = 1.8 sai do proxy com T = 1.0</code></pre>
+        </figure>
+      </div>
+      <p>De brinde, o exemplo em Dart já mostrou três recursos da linguagem que voltam no módulo 1: <em>collection for</em> (<code>[for (final z in logits) z / temperature]</code>), passar uma função como valor (<code>reduce(max)</code>) e parâmetro nomeado com valor padrão (<code>{double temperature = 1.0}</code>).</p>
+
+      <div class="block cases">
+        <h4>No mundo real</h4>
+        <ul>
+          <li><b>Banco, atendimento sobre tarifas e limites.</b> Temperatura baixa (perto de 0) para a mesma pergunta receber a mesma resposta, que é o que a auditoria e o cliente esperam. Temperatura alta aqui é o cliente ouvindo três valores diferentes para a mesma tarifa.</li>
+          <li><b>Varejo, descrições de produto e campanhas.</b> Temperatura média ou alta para gerar variações, com revisão humana antes de publicar. Repetir a mesma frase em mil produtos também é um jeito de perder cliente.</li>
+          <li><b>Saúde, extração de campos de um laudo para JSON.</b> Temperatura 0 mais esquema de saída validado. Laudo é o último lugar onde você quer criatividade.</li>
+        </ul>
+        <p>Esses valores são pontos de partida. Cada provedor tem padrão e limite próprios; o módulo 3 confere na documentação de Kimi e Qwen.</p>
+      </div>
+
+      <div class="block trap">
+        <h4>Pegadinhas</h4>
+        <ul>
+          <li><b>T = 0 não garante resposta idêntica sempre.</b> Diferenças de hardware, de lote e de implementação do provedor podem mudar o resultado. Para reprodutibilidade, use semente quando o provedor aceitar e um <a class="term" href="#g-harness">harness</a> que rode cada caso várias vezes.</li>
+          <li><b>Dividir por zero.</b> T = 0 na sua própria implementação é divisão por zero. Trate como argmax (pegar o maior logit).</li>
+          <li><b>Mexer em temperatura e top_p ao mesmo tempo.</b> Os efeitos se somam e você não sabe qual ajuste fez o quê. Mude um de cada vez.</li>
+          <li><b>Esquecer o truque do máximo.</b> Logits grandes viram NaN e o app mostra resposta vazia sem erro nenhum.</li>
+          <li><b>Achar que temperatura alta deixa o modelo mais inteligente.</b> Ela só deixa mais aleatório. Criatividade e alucinação moram na mesma rua.</li>
+        </ul>
+      </div>
+
+      <div class="quiz">
+        <h4>Mini-quiz</h4>
+        <div class="q">
+          <p class="q-text">1. Com os logits [2,0; 1,0; 0,1], a probabilidade de "Pix" é 65,9% em T = 1. O que acontece em T = 0,5?</p>
+          <ol class="q-options">
+            <li>Cai para cerca de 50%</li>
+            <li data-correct>Sobe para cerca de 86%</li>
+            <li>Vai a 100%, porque T menor que 1 sempre escolhe o maior</li>
+          </ol>
+          <details><summary>Ver resposta</summary><p>B. Dividir por 0,5 dobra as distâncias entre os logits (4, 2 e 0,2), e o favorito ganha: 54,598 ÷ 63,209 = 86,4%. Só chega a 100% no limite de T tendendo a zero.</p></details>
+        </div>
+        <div class="q">
+          <p class="q-text">2. Por que subtrair o maior logit antes de calcular exp?</p>
+          <ol class="q-options">
+            <li>Para o modelo rodar mais rápido</li>
+            <li data-correct>Para evitar estouro numérico sem mudar o resultado</li>
+            <li>Para aumentar a criatividade</li>
+          </ol>
+          <details><summary>Ver resposta</summary><p>B. O fator exp(−c) aparece no numerador e no denominador e se cancela. Os números só ficam pequenos o bastante para caber no float.</p></details>
+        </div>
+        <div class="q">
+          <p class="q-text">3. Seu app extrai valor, data e CNPJ de um recibo para JSON. Que temperatura usar?</p>
+          <ol class="q-options">
+            <li data-correct>0 ou bem perto de 0</li>
+            <li>1,5, para o modelo "pensar fora da caixa"</li>
+            <li>Tanto faz, o JSON valida sozinho</li>
+          </ol>
+          <details><summary>Ver resposta</summary><p>A. Extração quer a resposta mais provável, sempre. E o JSON não se valida sozinho: o módulo 3 mostra como checar o esquema antes de salvar.</p></details>
+        </div>
+      </div>
+    </section>
+
+    <label class="done-check" data-noexport><input type="checkbox" data-done="m0"> Terminei este módulo</label>
+  </section>
+
+  <!-- ===================== MÓDULO 1 ===================== -->
+  <section class="chapter" id="m1" data-track>
+    <h2><span class="num"><span class="vh">Módulo </span>1<span class="vh">:</span></span> Fundamentos de Dart</h2>
+    <p class="status"><span class="badge">planejado</span> Entra na parte 2.</p>
+    <p class="chapter-intro">Dart em poucas horas para quem já fala Python ou Go. Cada recurso da linguagem aparece resolvendo um problema real de app com IA, com comparação lado a lado.</p>
+
+    <section class="topic" id="m1-1">
+      <h3>1.1 Tipos, null safety e o JSON que o LLM devolve</h3>
+      <ul class="plan-list">
+        <li><b>Dart:</b> tipos e inferência, <code>final</code> e <code>const</code>, <a class="term" href="#g-null-safety">null safety</a> (<code>?</code>, <code>!</code>, <code>late</code>, <code>??</code>).</li>
+        <li><b>IA:</b> ler a resposta de um LLM em que <code>usage</code>, <code>tool_calls</code> e <code>finish_reason</code> podem não vir. Sem null safety, isso vira tela vermelha em produção.</li>
+        <li><b>Código:</b> A, parser de resposta em Dart puro (DartPad). B, o mesmo parser em Python com dataclasses, para comparar.</li>
+        <li><b>Extra:</b> tabela Dart, Python e Go (tipagem, nulos, erros, concorrência, compilação).</li>
+      </ul>
+    </section>
+    <section class="topic" id="m1-2">
+      <h3>1.2 Classes, records, sealed classes e pattern matching</h3>
+      <ul class="plan-list">
+        <li><b>Dart:</b> construtores nomeados e <code>factory</code>, records, <code>sealed class</code>, <code>switch</code> exaustivo.</li>
+        <li><b>IA:</b> modelar as mensagens do chat (system, user, assistant, tool) e o resultado de uma inferência (sucesso, recusa, erro), com o compilador avisando quando um caso ficou de fora.</li>
+        <li><b>Código:</b> A, tipos de mensagem com <code>switch</code> exaustivo. B, os mesmos tipos em Go com interfaces e <em>type switch</em>.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m1-3">
+      <h3>1.3 async/await e Futures</h3>
+      <ul class="plan-list">
+        <li><b>Dart:</b> event loop, <a class="term" href="#g-future">Future</a>, <code>async</code>/<code>await</code>, <code>timeout</code>, <code>Future.wait</code>.</li>
+        <li><b>IA:</b> chamar o modelo com prazo máximo e disparar duas tarefas em paralelo (classificar e resumir).</li>
+        <li><b>Matemática:</b> <a class="term" href="#g-p95">p50 e p95</a> com 20 medições de latência, passo a passo.</li>
+        <li><b>Código:</b> A, medição de latência e percentis em Dart. B, o mesmo cálculo em notebook Python, com histograma.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m1-4">
+      <h3>1.4 Streams e streaming de tokens</h3>
+      <ul class="plan-list">
+        <li><b>Dart:</b> <a class="term" href="#g-stream">Stream</a>, <code>async*</code> e <code>yield</code>, <code>await for</code>, <code>StreamController</code>, transformações.</li>
+        <li><b>IA:</b> streaming de tokens via <a class="term" href="#g-sse">SSE</a>, o texto aparecendo aos pedaços.</li>
+        <li><b>Matemática:</b> tempo até o primeiro token (TTFT) e tokens por segundo.</li>
+        <li><b>Código:</b> A, parser de SSE em Dart puro com servidor simulado. B, endpoint SSE de verdade em Go.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m1-5">
+      <h3>1.5 Isolates: inferência sem travar a tela</h3>
+      <ul class="plan-list">
+        <li><b>Dart:</b> memória separada, mensagens, <code>Isolate.run</code> e <code>compute</code>.</li>
+        <li><b>IA:</b> tokenizar, pré-processar imagem ou rodar inferência sem causar <a class="term" href="#g-jank">jank</a>. A demo do topo, só que em Dart.</li>
+        <li><b>Matemática:</b> orçamento de quadro (1000 ÷ 60 = 16,7 ms; a 120 Hz, 8,3 ms) e quantos quadros uma inferência de 300 ms derruba.</li>
+        <li><b>Código:</b> A, <code>Isolate.run</code> com similaridade em lote. B, o mesmo problema em Python com <code>multiprocessing</code>, e o papel do GIL nisso.</li>
+      </ul>
+    </section>
+    <div class="block cases"><h4>Casos do mundo real previstos</h4><p>Banco digital com chat que não pode congelar durante a resposta; varejo com busca que classifica a intenção enquanto o usuário digita.</p></div>
+    <p class="docs-links">Na documentação oficial: <a href="https://dart.dev/language">linguagem Dart</a>, <a href="https://dart.dev/null-safety">null safety</a>, <a href="https://dart.dev/libraries/async/async-await">assincronia</a>, <a href="https://docs.flutter.dev/perf/isolates">isolates no Flutter</a>.</p>
+    <label class="done-check" data-noexport><input type="checkbox" data-done="m1"> Terminei este módulo</label>
+  </section>
+
+  <!-- ===================== MÓDULO 2 ===================== -->
+  <section class="chapter" id="m2" data-track>
+    <h2><span class="num"><span class="vh">Módulo </span>2<span class="vh">:</span></span> Fundamentos de Flutter</h2>
+    <p class="status"><span class="badge">planejado</span> Entra na parte 3.</p>
+    <p class="chapter-intro">Do widget à tela de chat completa, com estado, rede, formulário e banco local. Tudo com <code>material_ui</code>.</p>
+
+    <section class="topic" id="m2-1">
+      <h3>2.1 Widgets e layout</h3>
+      <ul class="plan-list">
+        <li><b>Flutter:</b> tudo é <a class="term" href="#g-widget">widget</a>; Stateless e Stateful; Row, Column, ListView; "restrições descem, tamanhos sobem".</li>
+        <li><b>IA:</b> tela de chat com bolhas, indicador "digitando…" e texto chegando aos pedaços.</li>
+        <li><b>Código:</b> A, app de chat mínimo. B, servidor falso em Go que responde em streaming para testar a tela.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m2-2">
+      <h3>2.2 Navegação</h3>
+      <ul class="plan-list">
+        <li><b>Flutter:</b> Navigator, rotas com <code>go_router</code>, passagem de dados e deep links.</li>
+        <li><b>IA:</b> fluxo câmera, revisão do OCR, confirmação do gasto.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m2-3">
+      <h3>2.3 Gerência de estado: Riverpod 3, com Bloc ao lado</h3>
+      <ul class="plan-list">
+        <li><b>Escolha: Riverpod.</b> Os providers assíncronos (<code>AsyncNotifier</code>, <code>StreamNotifier</code>) casam com streaming de tokens; o descarte automático cancela a geração quando o usuário sai da tela, poupando token e bateria; e dá para testar sem montar widget nenhum.</li>
+        <li><b>Quando Bloc vence:</b> times grandes que querem cada evento explícito e rastreável, coisa que área regulada adora. Mostro o mesmo estado nos dois.</li>
+        <li><b>IA:</b> estado de uma conversa com agente: mensagens, token em andamento, erro, cancelamento, nova tentativa.</li>
+        <li><b>Código:</b> A, <code>ChatNotifier</code> com Riverpod. B, harness em Python que reproduz uma conversa gravada para testar o estado.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m2-4">
+      <h3>2.4 HTTP e JSON</h3>
+      <ul class="plan-list">
+        <li><b>Flutter:</b> <code>http</code> e <code>dio</code>, serialização, parse de JSON grande em segundo plano.</li>
+        <li><b>IA:</b> cliente do backend proxy com cancelamento e autenticação.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m2-5">
+      <h3>2.5 Formulários e validação</h3>
+      <ul class="plan-list">
+        <li><b>Flutter:</b> <code>Form</code>, <code>TextFormField</code>, validação, foco.</li>
+        <li><b>IA:</b> formulário de gasto em que um classificador sugere a categoria enquanto você digita. Aqui com regras; o modelo de verdade chega no módulo 4.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m2-6">
+      <h3>2.6 Persistência local</h3>
+      <ul class="plan-list">
+        <li><b>Flutter:</b> <code>shared_preferences</code>, arquivos, SQLite (<code>sqflite</code> ou o pacote <code>drift</code>, que não tem nada a ver com o <a class="term" href="#g-drift">drift</a> de modelo do módulo 10).</li>
+        <li><b>IA:</b> histórico de conversas e cache de respostas e embeddings, a base do RAG offline.</li>
+      </ul>
+    </section>
+    <div class="block cases"><h4>Casos do mundo real previstos</h4><p>Chat de atendimento de banco digital; app de lista de compras de varejo que sugere categoria e lembra preços.</p></div>
+    <p class="docs-links">Na documentação oficial: <a href="https://docs.flutter.dev/ui/layout">layout</a>, <a href="https://docs.flutter.dev/ui/navigation">navegação</a>, <a href="https://docs.flutter.dev/data-and-backend/state-mgmt/options">opções de estado</a>, <a href="https://docs.flutter.dev/cookbook/forms/validation">validação de formulário</a>, <a href="https://docs.flutter.dev/data-and-backend/persistence/choose-a-database">escolher um banco</a>.</p>
+    <label class="done-check" data-noexport><input type="checkbox" data-done="m2"> Terminei este módulo</label>
+  </section>
+
+  <!-- ===================== MÓDULO 3 ===================== -->
+  <section class="chapter" id="m3" data-track>
+    <h2><span class="num"><span class="vh">Módulo </span>3<span class="vh">:</span></span> IA via API: Kimi, Qwen e compatíveis com OpenAI</h2>
+    <p class="status"><span class="badge cloud">na nuvem</span><span class="badge">planejado</span> Entra na parte 4.</p>
+    <p class="chapter-intro">Chamar modelos grandes do jeito certo: com proxy, streaming, ferramentas, timeout, retry e a conta do custo antes da fatura chegar.</p>
+
+    <section class="topic" id="m3-1">
+      <h3>3.1 Anatomia de uma chamada compatível com OpenAI</h3>
+      <ul class="plan-list">
+        <li><b>Formato:</b> <code>chat/completions</code> com <code>messages</code>, <code>model</code>, <code>temperature</code>, <code>max_tokens</code>, a resposta e o bloco <code>usage</code>.</li>
+        <li><b>Provedores:</b> Kimi (Moonshot) e Qwen (Alibaba Cloud Model Studio). Base URL, nomes de modelo e região conferidos na documentação de cada um na hora de escrever.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m3-2">
+      <h3>3.2 Backend proxy em Go: a chave nunca vai no app</h3>
+      <ul class="plan-list">
+        <li><b>Por quê:</b> APK e IPA podem ser desmontados. Chave no app é chave pública.</li>
+        <li><b>Go:</b> <a class="term" href="#g-backend-proxy">proxy</a> com lista de modelos permitidos, teto de tokens e de temperatura, limite por usuário e logs sem dados pessoais. Alternativa equivalente em Python com FastAPI.</li>
+        <li><b>Diagrama:</b> app, proxy, provedor, e o que cada um sabe.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m3-3">
+      <h3>3.3 Streaming de ponta a ponta</h3>
+      <ul class="plan-list">
+        <li><b>Fluxo:</b> o Go repassa o SSE do provedor; o Flutter consome com Stream e atualiza a tela token a token.</li>
+        <li><b>Matemática:</b> TTFT e tokens por segundo medidos de verdade.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m3-4">
+      <h3>3.4 Tool calling</h3>
+      <ul class="plan-list">
+        <li><b>Conceito:</b> <a class="term" href="#g-tool-calling">tool calling</a> com esquema JSON; ciclo pedido, execução, resposta.</li>
+        <li><b>IA:</b> "quanto gastei com mercado?" vira <code>consultar_gastos(categoria, periodo)</code>, executada pelo app.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m3-5">
+      <h3>3.5 Timeout, retry e erros</h3>
+      <ul class="plan-list">
+        <li><b>Regras:</b> timeout de conexão e timeout total; repetir em 429 e 5xx, nunca em 400 e 401; respeitar <code>Retry-After</code>.</li>
+        <li><b>Matemática:</b> espera = base × 2<sup>tentativa</sup> + sorteio (jitter), e a soma das esperas no pior caso.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m3-6">
+      <h3>3.6 Custo por token</h3>
+      <ul class="plan-list">
+        <li><b>Conta:</b> tokens de entrada e de saída, preço por milhão, cache de prompt.</li>
+        <li><b>Matemática:</b> custo por conversa e por mês para 100 mil usuários, com preços tirados da página oficial na data da escrita.</li>
+      </ul>
+    </section>
+    <div class="block cases"><h4>Casos do mundo real previstos</h4><p>Atendimento bancário com proxy auditável; busca conversacional no varejo com teto de custo por sessão.</p></div>
+    <p class="docs-links">Na documentação oficial: <a href="https://docs.flutter.dev/ai/best-practices/tool-calls">tool calls</a>, <a href="https://docs.flutter.dev/ai/best-practices/structure-output">saída estruturada</a>, <a href="https://docs.flutter.dev/cookbook/networking/fetch-data">buscar dados</a>.</p>
+    <label class="done-check" data-noexport><input type="checkbox" data-done="m3"> Terminei este módulo</label>
+  </section>
+
+  <!-- ===================== MÓDULO 4 ===================== -->
+  <section class="chapter" id="m4" data-track>
+    <h2><span class="num"><span class="vh">Módulo </span>4<span class="vh">:</span></span> Modelo de decisão no aparelho</h2>
+    <p class="status"><span class="badge device">no aparelho</span><span class="badge">planejado</span> Entra na parte 5.</p>
+    <p class="chapter-intro">Nem todo problema de IA precisa de LLM. Uma árvore de decisão bem treinada cabe em poucos kilobytes, responde em microssegundos e não manda nada para fora do celular.</p>
+
+    <section class="topic" id="m4-1">
+      <h3>4.1 Árvore de decisão sem mistério</h3>
+      <ul class="plan-list">
+        <li><b>Matemática:</b> entropia e ganho de informação com uma tabela de 10 gastos, passo a passo.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m4-2">
+      <h3>4.2 Treino em Python</h3>
+      <ul class="plan-list">
+        <li><b>Notebook:</b> detector de gasto atípico e previsor de categoria com árvore (scikit-learn) e gradient boosting (LightGBM ou XGBoost).</li>
+        <li><b>Dados:</b> sintéticos, gerados no próprio notebook. Nenhum dado real de cliente.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m4-3">
+      <h3>4.3 Métricas que importam</h3>
+      <ul class="plan-list">
+        <li><b>Matemática:</b> acurácia, precisão, recall, F1 e matriz de confusão num detector de fraude com 1% de positivos. Spoiler: 99% de acurácia pode ser um modelo que nunca acha fraude.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m4-4">
+      <h3>4.4 Exportação: três caminhos</h3>
+      <ul class="plan-list">
+        <li><b>Regras viram código Dart:</b> zero dependência, ótimo para árvores pequenas.</li>
+        <li><b>ONNX:</b> com ONNX Runtime no app.</li>
+        <li><b><a class="term" href="#g-litert">LiteRT</a>:</b> quando o modelo já mora no ecossistema TensorFlow.</li>
+        <li><b>Comparação:</b> tamanho, latência e manutenção de cada caminho.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m4-5">
+      <h3>4.5 Rodando no app</h3>
+      <ul class="plan-list">
+        <li><b>Flutter:</b> o formulário do módulo 2 passa a usar o modelo de verdade.</li>
+        <li><b>Teste de paridade:</b> Python e Dart têm que dar a mesma resposta para os mesmos dados.</li>
+      </ul>
+    </section>
+    <div class="block cases"><h4>Casos do mundo real previstos</h4><p>Banco: alerta de gasto fora do padrão no próprio aparelho. Varejo: categoria automática de itens de nota fiscal.</p></div>
+    <p class="docs-links">Referências: <a href="https://scikit-learn.org/stable/modules/tree.html">árvores no scikit-learn</a>, <a href="https://onnxruntime.ai/docs/">ONNX Runtime</a>, <a href="https://ai.google.dev/edge/litert">LiteRT</a>.</p>
+    <label class="done-check" data-noexport><input type="checkbox" data-done="m4"> Terminei este módulo</label>
+  </section>
+
+  <!-- ===================== MÓDULO 5 ===================== -->
+  <section class="chapter" id="m5" data-track>
+    <h2><span class="num"><span class="vh">Módulo </span>5<span class="vh">:</span></span> Visão e áudio com modelos prontos</h2>
+    <p class="status"><span class="badge device">no aparelho</span><span class="badge">planejado</span> Entra na parte 6.</p>
+    <p class="chapter-intro">ML Kit e MediaPipe resolvem muita coisa sem você treinar nada. O trabalho é escolher, configurar e validar.</p>
+
+    <section class="topic" id="m5-1">
+      <h3>5.1 OCR de recibo</h3>
+      <ul class="plan-list">
+        <li><b>Ferramenta:</b> ML Kit Text Recognition, com suporte e tamanho de cada plugin conferidos para Android e iOS.</li>
+        <li><b>Matemática:</b> taxa de erro por caractere (CER), com distância de edição.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m5-2">
+      <h3>5.2 Do texto ao JSON</h3>
+      <ul class="plan-list">
+        <li><b>Estratégia:</b> regex para o previsível (CNPJ, data, total) e modelo para o resto, sempre com validação.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m5-3">
+      <h3>5.3 Detecção de objetos</h3>
+      <ul class="plan-list">
+        <li><b>Ferramentas:</b> ML Kit Object Detection e MediaPipe; caixas, confiança e limiar.</li>
+        <li><b>Matemática:</b> IoU, o quanto duas caixas se sobrepõem.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m5-4">
+      <h3>5.4 Transcrição de áudio</h3>
+      <ul class="plan-list">
+        <li><b>Comparação:</b> reconhecimento de fala do sistema, Whisper no aparelho (whisper.cpp) e API; latência, privacidade e português.</li>
+      </ul>
+    </section>
+    <div class="block cases"><h4>Casos do mundo real previstos</h4><p>Saúde: leitura de pedido médico com revisão humana. Varejo: conferência de prateleira pela câmera.</p></div>
+    <p class="docs-links">Referências: <a href="https://developers.google.com/ml-kit">ML Kit</a>, <a href="https://ai.google.dev/edge/mediapipe/solutions/guide">MediaPipe Solutions</a>.</p>
+    <label class="done-check" data-noexport><input type="checkbox" data-done="m5"> Terminei este módulo</label>
+  </section>
+
+  <!-- ===================== MÓDULO 6 ===================== -->
+  <section class="chapter" id="m6" data-track>
+    <h2><span class="num"><span class="vh">Módulo </span>6<span class="vh">:</span></span> SLM no celular</h2>
+    <p class="status"><span class="badge device">no aparelho</span><span class="badge">planejado</span> Entra na parte 7.</p>
+    <p class="chapter-intro">Um <a class="term" href="#g-slm">SLM</a> de 0,5 a 3 bilhões de parâmetros, quantizado, rodando no bolso. Primeiro a conta de memória, depois o código.</p>
+
+    <section class="topic" id="m6-1">
+      <h3>6.1 Cabe no meu celular?</h3>
+      <ul class="plan-list">
+        <li><b>Matemática:</b> memória = parâmetros × bytes por parâmetro + <a class="term" href="#g-kv-cache">KV cache</a> + sobra do runtime. Exemplo resolvido com um modelo de 1,5B em 4 bits.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m6-2">
+      <h3>6.2 Quantização</h3>
+      <ul class="plan-list">
+        <li><b>Matemática:</b> <a class="term" href="#g-quantizacao">quantização</a> de float32 para int8 e 4 bits com escala e zero-point, passo a passo, e quanto erro isso introduz.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m6-3">
+      <h3>6.3 GGUF e llama.cpp via FFI</h3>
+      <ul class="plan-list">
+        <li><b>Dart:</b> <code>dart:ffi</code> e ffigen; carregar um <a class="term" href="#g-gguf">GGUF</a>, gerar tokens dentro de um Isolate, cancelar no meio.</li>
+        <li><b>Código B:</b> Python para baixar, quantizar e testar o modelo antes de pôr no app.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m6-4">
+      <h3>6.4 LiteRT-LM e flutter_gemma</h3>
+      <ul class="plan-list">
+        <li><b>Caminho do Google</b> para LLM no aparelho, com o pacote comunitário para Flutter. Estado de cada um conferido na data da escrita.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m6-5">
+      <h3>6.5 IA do sistema: Gemini Nano e Foundation Models</h3>
+      <ul class="plan-list">
+        <li><b>Gemini Nano</b> via ML Kit GenAI <span class="badge os">só Android</span>, em aparelhos compatíveis.</li>
+        <li><b>Foundation Models</b> da Apple <span class="badge os">só iOS</span>, iOS 26 ou mais novo com Apple Intelligence, via Pigeon ou platform channel.</li>
+      </ul>
+    </section>
+    <section class="topic" id="m6-6">
+      <h3>6.6 Três tarefas, dois mundos</h3>
+      <ul class="plan-list">
+        <li><b>Tarefas:</b> resumo, extração em JSON e classificação de intenção.</li>
+        <li><b>Comparação com a API:</b> qualidade, TTFT, tokens por segundo, custo e bateria, lado a lado.</li>
+      </ul>
+    </section>
+    <div class="block cases"><h4>Casos do mundo real previstos</h4><p>Banco: classificar a intenção no aparelho antes de mandar qualquer coisa para a nuvem. Saúde: resumir anotações sem que elas saiam do celular.</p></div>
+    <p class="docs-links">Na documentação oficial: <a href="https://docs.flutter.dev/interop/dart-ffi">dart:ffi</a>, <a href="https://docs.flutter.dev/interop/ffigen">ffigen</a>, <a href="https://docs.flutter.dev/interop/pigeon">Pigeon</a>, <a href="https://docs.flutter.dev/platform-integration/platform-channels">platform channels</a>, <a href="https://developers.google.com/edge/mediapipe/solutions/genai/llm_inference">LLMs no aparelho (Google)</a>.</p>
+    <label class="done-check" data-noexport><input type="checkbox" data-done="m6"> Terminei este módulo</label>
+  </section>
+
+  <!-- ===================== MÓDULO 7 ===================== -->
+  <section class="chapter" id="m7" data-track>
+    <h2><span class="num"><span class="vh">Módulo </span>7<span class="vh">:</span></span> Arquitetura híbrida</h2>
+    <p class="status"><span class="badge device">no aparelho</span><span class="badge cloud">na nuvem</span><span class="badge">planejado</span> Entra na parte 8.</p>
+    <p class="chapter-intro">Um roteador que decide, pedido a pedido, se a IA roda no celular ou na nuvem.</p>
+    <section class="topic" id="m7-1">
+      <h3>7.1 Os critérios</h3>
+      <ul class="plan-list"><li>Privacidade, latência, custo, bateria, conectividade e capacidade do aparelho, cada um com um sinal que o app consegue medir.</li></ul>
+    </section>
+    <section class="topic" id="m7-2">
+      <h3>7.2 Roteador em Dart</h3>
+      <ul class="plan-list"><li>Política com regras e pontuação, diagrama de decisão em Mermaid e testes de cada caminho.</li></ul>
+    </section>
+    <section class="topic" id="m7-3">
+      <h3>7.3 Fallback e offline-first</h3>
+      <ul class="plan-list"><li>O que fazer quando a nuvem cai, o aparelho esquenta ou a cota do usuário acaba.</li></ul>
+    </section>
+    <section class="topic" id="m7-4">
+      <h3>7.4 A conta do roteador</h3>
+      <ul class="plan-list">
+        <li><b>Matemática:</b> custo e latência esperados (média ponderada pela chance de cada rota) e o ponto de equilíbrio entre as duas.</li>
+        <li><b>Código B:</b> Go devolvendo ao app a cota restante de cada usuário.</li>
+      </ul>
+    </section>
+    <p class="docs-links">Na documentação oficial: <a href="https://docs.flutter.dev/app-architecture/recommendations">recomendações de arquitetura</a>.</p>
+    <label class="done-check" data-noexport><input type="checkbox" data-done="m7"> Terminei este módulo</label>
+  </section>
+
+  <!-- ===================== MÓDULO 8 ===================== -->
+  <section class="chapter" id="m8" data-track>
+    <h2><span class="num"><span class="vh">Módulo </span>8<span class="vh">:</span></span> RAG e embeddings no celular</h2>
+    <p class="status"><span class="badge device">no aparelho</span><span class="badge">planejado</span> Entra na parte 8.</p>
+    <p class="chapter-intro">Perguntas sobre os seus próprios dados, respondidas com fonte, sem internet.</p>
+    <section class="topic" id="m8-1">
+      <h3>8.1 Embeddings</h3>
+      <ul class="plan-list"><li>O que é um <a class="term" href="#g-embedding">embedding</a>, modelos que rodam no aparelho e quando vale usar a API.</li></ul>
+    </section>
+    <section class="topic" id="m8-2">
+      <h3>8.2 Similaridade de cosseno</h3>
+      <ul class="plan-list"><li><b>Matemática:</b> vetores de 3 dimensões resolvidos à mão, depois 384 em código; por que normalizar antes.</li></ul>
+    </section>
+    <section class="topic" id="m8-3">
+      <h3>8.3 Banco vetorial local</h3>
+      <ul class="plan-list"><li>Força bruta contra índice aproximado (HNSW); opções em SQLite e bancos embarcados, com pacotes conferidos no módulo; cache de embeddings.</li></ul>
+    </section>
+    <section class="topic" id="m8-4">
+      <h3>8.4 RAG offline de ponta a ponta</h3>
+      <ul class="plan-list">
+        <li>Divisão em trechos, indexação, busca, montagem do prompt e citação da fonte num <a class="term" href="#g-rag">RAG</a> completo.</li>
+        <li><b>Matemática:</b> recall@k para avaliar a busca. <b>Código B:</b> notebook que escolhe o tamanho de trecho pelo recall.</li>
+      </ul>
+    </section>
+    <p class="docs-links">Na documentação oficial: <a href="https://docs.flutter.dev/cookbook/persistence/sqlite">SQLite</a>, <a href="https://docs.flutter.dev/perf/isolates">isolates</a>.</p>
+    <label class="done-check" data-noexport><input type="checkbox" data-done="m8"> Terminei este módulo</label>
+  </section>
+
+  <!-- ===================== MÓDULO 9 ===================== -->
+  <section class="chapter" id="m9" data-track>
+    <h2><span class="num"><span class="vh">Módulo </span>9<span class="vh">:</span></span> Agentes dentro do app</h2>
+    <p class="status"><span class="badge device">no aparelho</span><span class="badge cloud">na nuvem</span><span class="badge">planejado</span> Entra na parte 9.</p>
+    <p class="chapter-intro">O modelo pede, o app executa, e ninguém transfere dinheiro sem o usuário confirmar.</p>
+    <section class="topic" id="m9-1">
+      <h3>9.1 O loop do agente</h3>
+      <ul class="plan-list"><li>Pensar, chamar ferramenta, observar, responder; limite de passos e de tempo.</li></ul>
+    </section>
+    <section class="topic" id="m9-2">
+      <h3>9.2 Ferramentas do próprio app</h3>
+      <ul class="plan-list"><li>Agenda, câmera e notificações com esquema JSON e permissões do sistema, com as diferenças entre Android e iOS.</li></ul>
+    </section>
+    <section class="topic" id="m9-3">
+      <h3>9.3 Guardrails</h3>
+      <ul class="plan-list"><li>Confirmação humana para ação com efeito, lista de ferramentas permitidas, validação de argumentos e limites de valor.</li></ul>
+    </section>
+    <section class="topic" id="m9-4">
+      <h3>9.4 Estado e testes do agente</h3>
+      <ul class="plan-list"><li>Memória da conversa com Riverpod (volta ao módulo 2) e testes com conversas gravadas.</li></ul>
+    </section>
+    <p class="docs-links">Na documentação oficial: <a href="https://docs.flutter.dev/ai/best-practices/tool-calls">tool calls</a>, <a href="https://docs.flutter.dev/ai/best-practices/mode-of-interaction">modos de interação</a>.</p>
+    <label class="done-check" data-noexport><input type="checkbox" data-done="m9"> Terminei este módulo</label>
+  </section>
+
+  <!-- ===================== MÓDULO 10 ===================== -->
+  <section class="chapter" id="m10" data-track>
+    <h2><span class="num"><span class="vh">Módulo </span>10<span class="vh">:</span></span> MLOps e AIOps mobile</h2>
+    <p class="status"><span class="badge device">no aparelho</span><span class="badge cloud">na nuvem</span><span class="badge">planejado</span> Entra na parte 9.</p>
+    <p class="chapter-intro">Modelo em produção é software em produção: versão, implantação gradual, métrica, alarme e botão de desfazer.</p>
+    <section class="topic" id="m10-1">
+      <h3>10.1 Modelo como artefato</h3>
+      <ul class="plan-list"><li>Versionamento, manifesto, hash SHA-256, assinatura e download OTA que retoma de onde parou.</li></ul>
+    </section>
+    <section class="topic" id="m10-2">
+      <h3>10.2 Feature flags e teste A/B</h3>
+      <ul class="plan-list"><li><b>Matemática:</b> diferença entre duas taxas e quando ela é real (teste z de proporções, explicado sem dor).</li></ul>
+    </section>
+    <section class="topic" id="m10-3">
+      <h3>10.3 Telemetria</h3>
+      <ul class="plan-list"><li>Latência p50 e p95, tokens por segundo, erros e feedback do usuário, sem dados pessoais.</li></ul>
+    </section>
+    <section class="topic" id="m10-4">
+      <h3>10.4 Drift</h3>
+      <ul class="plan-list"><li><b>Matemática:</b> PSI (índice de estabilidade populacional) com exemplo numérico, e o limiar que dispara alarme.</li></ul>
+    </section>
+    <section class="topic" id="m10-5">
+      <h3>10.5 Harness de avaliação e rollback</h3>
+      <ul class="plan-list">
+        <li>Conjunto de referência em Python, nota mínima para liberar versão e rollback automático.</li>
+        <li><b>Código B:</b> servidor de manifesto em Go com implantação gradual.</li>
+      </ul>
+    </section>
+    <p class="docs-links">Na documentação oficial: <a href="https://docs.flutter.dev/deployment/flavors">flavors</a>, <a href="https://docs.flutter.dev/cookbook/maintenance/error-reporting">relatório de erros</a>, <a href="https://docs.flutter.dev/deployment/cd">entrega contínua</a>.</p>
+    <label class="done-check" data-noexport><input type="checkbox" data-done="m10"> Terminei este módulo</label>
+  </section>
+
+  <!-- ===================== MÓDULO 11 ===================== -->
+  <section class="chapter" id="m11" data-track>
+    <h2><span class="num"><span class="vh">Módulo </span>11<span class="vh">:</span></span> Desempenho e limites do aparelho</h2>
+    <p class="status"><span class="badge device">no aparelho</span><span class="badge">planejado</span> Entra na parte 10.</p>
+    <p class="chapter-intro">O emulador é educado e mente. Aqui a gente mede no aparelho de verdade.</p>
+    <section class="topic" id="m11-1">
+      <h3>11.1 Memória</h3>
+      <ul class="plan-list"><li>Quando o sistema mata o app (low memory killer no Android, jetsam no iOS) e como medir antes que aconteça.</li></ul>
+    </section>
+    <section class="topic" id="m11-2">
+      <h3>11.2 Bateria e aquecimento</h3>
+      <ul class="plan-list"><li><b>Matemática:</b> energia = potência × tempo; quantos tokens custa 1% de bateria; o que acontece quando o chip reduz a velocidade por calor.</li></ul>
+    </section>
+    <section class="topic" id="m11-3">
+      <h3>11.3 Tamanho do app</h3>
+      <ul class="plan-list"><li>Divisão por arquitetura, modelo baixado sob demanda e componentes adiados.</li></ul>
+    </section>
+    <section class="topic" id="m11-4">
+      <h3>11.4 Aceleração por GPU e NPU</h3>
+      <ul class="plan-list"><li><a class="term" href="#g-delegate">Delegates</a>, Core ML e o que muda entre Android e iOS.</li></ul>
+    </section>
+    <section class="topic" id="m11-5">
+      <h3>11.5 Medindo de verdade</h3>
+      <ul class="plan-list"><li>Profile mode, DevTools e benchmark repetível no aparelho físico.</li></ul>
+    </section>
+    <p class="docs-links">Na documentação oficial: <a href="https://docs.flutter.dev/perf">desempenho</a>, <a href="https://docs.flutter.dev/perf/app-size">tamanho do app</a>, <a href="https://docs.flutter.dev/perf/deferred-components">componentes adiados</a>, <a href="https://docs.flutter.dev/tools/devtools/performance">DevTools</a>.</p>
+    <label class="done-check" data-noexport><input type="checkbox" data-done="m11"> Terminei este módulo</label>
+  </section>
+
+  <!-- ===================== MÓDULO 12 ===================== -->
+  <section class="chapter" id="m12" data-track>
+    <h2><span class="num"><span class="vh">Módulo </span>12<span class="vh">:</span></span> Segurança e privacidade</h2>
+    <p class="status"><span class="badge device">no aparelho</span><span class="badge cloud">na nuvem</span><span class="badge">planejado</span> Entra na parte 10.</p>
+    <p class="chapter-intro">LGPD, prompt injection e o que dá (e o que não dá) para proteger num modelo que mora no aparelho do usuário.</p>
+    <section class="topic" id="m12-1">
+      <h3>12.1 LGPD na prática</h3>
+      <ul class="plan-list"><li>Base legal, minimização, dados sensíveis e o que nunca sai do aparelho.</li></ul>
+    </section>
+    <section class="topic" id="m12-2">
+      <h3>12.2 Prompt injection</h3>
+      <ul class="plan-list"><li>Direta e indireta. Exemplo: um recibo com texto escondido mandando o agente agendar um pagamento.</li></ul>
+    </section>
+    <section class="topic" id="m12-3">
+      <h3>12.3 Armazenamento seguro</h3>
+      <ul class="plan-list"><li>Keychain e Keystore (<code>flutter_secure_storage</code>), tokens de sessão, e nunca chave de API.</li></ul>
+    </section>
+    <section class="topic" id="m12-4">
+      <h3>12.4 Proteção do modelo embarcado</h3>
+      <ul class="plan-list"><li>Ofuscação, criptografia em repouso e o limite honesto disso: quem tem o aparelho tem o modelo.</li></ul>
+    </section>
+    <section class="topic" id="m12-5">
+      <h3>12.5 Logs sem dados pessoais</h3>
+      <ul class="plan-list"><li>Mascarar CPF, e-mail e número de cartão antes de qualquer envio de telemetria.</li></ul>
+    </section>
+    <p class="docs-links">Na documentação oficial: <a href="https://docs.flutter.dev/deployment/obfuscate">ofuscação</a>, <a href="https://docs.flutter.dev/platform-integration/android/sensitive-content">conteúdo sensível no Android</a>.</p>
+    <label class="done-check" data-noexport><input type="checkbox" data-done="m12"> Terminei este módulo</label>
+  </section>
+
+  <!-- ===================== MÓDULO 13 ===================== -->
+  <section class="chapter" id="m13" data-track>
+    <h2><span class="num"><span class="vh">Módulo </span>13<span class="vh">:</span></span> Projeto final: assistente financeiro offline-first</h2>
+    <p class="status"><span class="badge device">no aparelho</span><span class="badge cloud">na nuvem</span><span class="badge">planejado</span> Entra na parte 11.</p>
+    <p class="chapter-intro">Um app que lê recibos, categoriza gastos no aparelho, responde perguntas sobre o seu dinheiro e só usa a nuvem quando vale a pena.</p>
+    <section class="topic" id="m13-1">
+      <h3>13.1 Arquitetura e diagrama completo</h3>
+      <ul class="plan-list"><li>Camadas, pacotes e versões fixadas, com o diagrama do fluxo inteiro.</li></ul>
+    </section>
+    <section class="topic" id="m13-2">
+      <h3>13.2 Fluxo do recibo</h3>
+      <ul class="plan-list"><li>Câmera, OCR (módulo 5), extração (6), categoria (4), salvar (2).</li></ul>
+    </section>
+    <section class="topic" id="m13-3">
+      <h3>13.3 Conversa</h3>
+      <ul class="plan-list"><li>Roteador (7) escolhe SLM ou API (3 e 6); RAG sobre os gastos (8); agente cria lembretes (9).</li></ul>
+    </section>
+    <section class="topic" id="m13-4">
+      <h3>13.4 Operação</h3>
+      <ul class="plan-list"><li>OTA e telemetria (10), desempenho (11), segurança (12).</li></ul>
+    </section>
+    <section class="topic" id="m13-5">
+      <h3>13.5 Checklist de entrega e testes</h3>
+      <ul class="plan-list"><li>Testes de unidade, de widget e de integração, mais o harness de IA rodando no CI.</li></ul>
+    </section>
+    <p class="docs-links">Na documentação oficial: <a href="https://docs.flutter.dev/app-architecture/case-study">estudo de caso de arquitetura</a>, <a href="https://docs.flutter.dev/testing/overview">testes</a>.</p>
+    <label class="done-check" data-noexport><input type="checkbox" data-done="m13"> Terminei este módulo</label>
+  </section>
+
+  <!-- ===================== GLOSSÁRIO ===================== -->
+  <section class="chapter" id="glossario">
+    <h2>Glossário</h2>
+    <p class="chapter-intro">Em ordem alfabética, com uma analogia do dia a dia e o lugar onde o termo aparece. Cresce a cada parte entregue.</p>
+    <nav class="g-letters" id="glossario-letras" aria-label="Letras do glossário" data-noexport></nav>
+    <dl id="glossario-lista">
+      <div class="g-entry" id="g-amostragem"><dt>Amostragem (sampling)</dt><dd><p class="g-def">Escolher o próximo token sorteando de acordo com as probabilidades, em vez de pegar sempre o mais provável.</p><p class="g-analogy">Analogia: um dado viciado. O lado favorito sai mais, mas não sempre.</p><p class="g-where">Aparece em: <a href="#m0-4">0.4</a></p></dd></div>
+      <div class="g-entry" id="g-backend-proxy"><dt>Backend proxy</dt><dd><p class="g-def">Servidor seu que fica entre o app e o provedor de IA, guarda a chave de API e aplica as regras (limites, logs, custo).</p><p class="g-analogy">Analogia: o porteiro que guarda a chave do prédio. O morador pede, ele abre.</p><p class="g-where">Aparece em: <a href="#m3-2">3.2</a></p></dd></div>
+      <div class="g-entry" id="g-delegate"><dt>Delegate</dt><dd><p class="g-def">Ponte que manda partes da inferência para um acelerador (GPU, NPU) em vez da CPU.</p><p class="g-analogy">Analogia: terceirizar a conta pesada para quem tem a calculadora melhor.</p><p class="g-where">Aparece em: <a href="#m11-4">11.4</a></p></dd></div>
+      <div class="g-entry" id="g-drift"><dt>Drift (de dados)</dt><dd><p class="g-def">Quando os dados do mundo real deixam de parecer com os de treino e o modelo piora sem dar erro nenhum.</p><p class="g-analogy">Analogia: o GPS ainda tem o mapa de 2019 e a cidade ganhou um viaduto.</p><p class="g-where">Aparece em: <a href="#m10-4">10.4</a></p></dd></div>
+      <div class="g-entry" id="g-embedding"><dt>Embedding</dt><dd><p class="g-def">Lista de números (vetor) que representa o significado de um texto ou imagem. Coisas parecidas ficam com vetores próximos.</p><p class="g-analogy">Analogia: coordenadas de GPS do significado.</p><p class="g-where">Aparece em: <a href="#m8-1">8.1</a></p></dd></div>
+      <div class="g-entry" id="g-entropia"><dt>Entropia</dt><dd><p class="g-def">Medida, em bits, de quanta incerteza existe numa distribuição de probabilidades.</p><p class="g-analogy">Analogia: o grau de "sei lá" de uma resposta.</p><p class="g-where">Aparece em: <a href="#m0-4">0.4</a> e <a href="#m4-1">4.1</a></p></dd></div>
+      <div class="g-entry" id="g-future"><dt>Future</dt><dd><p class="g-def">Valor que vai ficar pronto (ou falhar) mais tarde. Você usa <code>await</code> para esperar sem travar a tela.</p><p class="g-analogy">Analogia: a senha do restaurante. Você recebe agora, o prato chega depois.</p><p class="g-where">Aparece em: <a href="#m1-3">1.3</a></p></dd></div>
+      <div class="g-entry" id="g-gguf"><dt>GGUF</dt><dd><p class="g-def">Formato de arquivo do ecossistema llama.cpp que guarda os pesos do modelo (geralmente quantizados) e os metadados num arquivo só.</p><p class="g-analogy">Analogia: marmita lacrada com a comida e a etiqueta de como esquentar.</p><p class="g-where">Aparece em: <a href="#m6-3">6.3</a></p></dd></div>
+      <div class="g-entry" id="g-harness"><dt>Harness de avaliação</dt><dd><p class="g-def">Programa que roda o modelo contra um conjunto fixo de casos e dá uma nota, para comparar versões com o mesmo critério.</p><p class="g-analogy">Analogia: a prova padronizada. Todo aluno responde as mesmas questões.</p><p class="g-where">Aparece em: <a href="#m0-4">0.4</a> e <a href="#m10-5">10.5</a></p></dd></div>
+      <div class="g-entry" id="g-isolate"><dt>Isolate</dt><dd><p class="g-def">Linha de execução do Dart com memória própria, que conversa com as outras só por mensagens. É onde roda o trabalho pesado para não travar a tela.</p><p class="g-analogy">Analogia: um colega em outra sala fazendo o relatório. Vocês trocam bilhetes; ninguém mexe na mesa do outro.</p><p class="g-where">Aparece em: <a href="#inicio">início</a> e <a href="#m1-5">1.5</a></p></dd></div>
+      <div class="g-entry" id="g-jank"><dt>Jank</dt><dd><p class="g-def">Engasgo visível na animação quando um quadro não fica pronto a tempo (16,7 ms a 60 quadros por segundo).</p><p class="g-analogy">Analogia: a videochamada que congela bem na hora da piada.</p><p class="g-where">Aparece em: <a href="#inicio">início</a> e <a href="#m1-5">1.5</a></p></dd></div>
+      <div class="g-entry" id="g-kv-cache"><dt>KV cache</dt><dd><p class="g-def">Memória em que o modelo guarda contas já feitas sobre os tokens anteriores para não refazê-las a cada token novo. Cresce com o tamanho do contexto.</p><p class="g-analogy">Analogia: o marca-texto no livro. Você não relê tudo para continuar a frase.</p><p class="g-where">Aparece em: <a href="#m6-1">6.1</a></p></dd></div>
+      <div class="g-entry" id="g-litert"><dt>LiteRT</dt><dd><p class="g-def">Novo nome do TensorFlow Lite, o runtime do Google para rodar modelos no aparelho.</p><p class="g-analogy">Analogia: a mesma banda com nome novo no cartaz.</p><p class="g-where">Aparece em: <a href="#m0-2">0.2</a> e <a href="#m4-4">4.4</a></p></dd></div>
+      <div class="g-entry" id="g-llm"><dt>LLM</dt><dd><p class="g-def">Modelo de linguagem grande, treinado para prever o próximo token. É a base de chatbots e assistentes.</p><p class="g-analogy">Analogia: o corretor do teclado depois de ler meia internet.</p><p class="g-where">Aparece em: <a href="#m0-4">0.4</a></p></dd></div>
+      <div class="g-entry" id="g-logit"><dt>Logit</dt><dd><p class="g-def">Nota crua que o modelo dá para cada token candidato, antes de virar probabilidade. Pode ser qualquer número, inclusive negativo.</p><p class="g-analogy">Analogia: a nota do jurado antes de virar porcentagem de votos.</p><p class="g-where">Aparece em: <a href="#m0-4">0.4</a></p></dd></div>
+      <div class="g-entry" id="g-null-safety"><dt>Null safety</dt><dd><p class="g-def">Regra do Dart em que uma variável só pode ser nula se o tipo disser isso (com <code>?</code>), e o compilador cobra a verificação.</p><p class="g-analogy">Analogia: o fiscal que não deixa você sair com a caixa sem conferir se tem algo dentro.</p><p class="g-where">Aparece em: <a href="#m1-1">1.1</a></p></dd></div>
+      <div class="g-entry" id="g-p95"><dt>p50 e p95 (percentis)</dt><dd><p class="g-def">p50 é o valor do meio: metade das medições fica abaixo. p95 é o valor que 95% das medições não ultrapassam.</p><p class="g-analogy">Analogia: o p95 da fila do banco é o tempo que quase todo mundo espera, no máximo.</p><p class="g-where">Aparece em: <a href="#m1-3">1.3</a> e <a href="#m10-3">10.3</a></p></dd></div>
+      <div class="g-entry" id="g-quantizacao"><dt>Quantização</dt><dd><p class="g-def">Guardar os pesos do modelo com menos bits (int8, 4 bits) em vez de float32, trocando um pouco de precisão por muito menos memória.</p><p class="g-analogy">Analogia: salvar a foto em JPEG em vez de RAW.</p><p class="g-where">Aparece em: <a href="#m6-2">6.2</a></p></dd></div>
+      <div class="g-entry" id="g-rag"><dt>RAG</dt><dd><p class="g-def">Geração aumentada por recuperação: buscar trechos relevantes nos seus dados e colocá-los no prompt antes de o modelo responder.</p><p class="g-analogy">Analogia: prova com consulta. O modelo pode olhar a apostila.</p><p class="g-where">Aparece em: <a href="#m8-4">8.4</a></p></dd></div>
+      <div class="g-entry" id="g-slm"><dt>SLM</dt><dd><p class="g-def">Modelo de linguagem pequeno, de centenas de milhões a poucos bilhões de parâmetros, feito para caber em aparelhos.</p><p class="g-analogy">Analogia: o canivete suíço. Não substitui a caixa de ferramentas, mas cabe no bolso.</p><p class="g-where">Aparece em: <a href="#m6">módulo 6</a></p></dd></div>
+      <div class="g-entry" id="g-softmax"><dt>Softmax</dt><dd><p class="g-def">Função que transforma uma lista de notas (logits) em probabilidades positivas que somam 1.</p><p class="g-analogy">Analogia: dividir uma pizza entre os candidatos, com fatia maior para quem tirou nota maior.</p><p class="g-where">Aparece em: <a href="#m0-4">0.4</a></p></dd></div>
+      <div class="g-entry" id="g-sse"><dt>SSE (Server-Sent Events)</dt><dd><p class="g-def">Padrão HTTP em que o servidor manda vários pedaços de resposta pela mesma conexão aberta. É como os LLMs fazem streaming.</p><p class="g-analogy">Analogia: rádio. O servidor transmite e o app só escuta.</p><p class="g-where">Aparece em: <a href="#m1-4">1.4</a> e <a href="#m3-3">3.3</a></p></dd></div>
+      <div class="g-entry" id="g-stream"><dt>Stream</dt><dd><p class="g-def">Sequência de valores que chegam ao longo do tempo. Você escuta com <code>listen</code> ou <code>await for</code>.</p><p class="g-analogy">Analogia: esteira de sushi. Os pratos passam um de cada vez.</p><p class="g-where">Aparece em: <a href="#m1-4">1.4</a></p></dd></div>
+      <div class="g-entry" id="g-temperatura"><dt>Temperatura</dt><dd><p class="g-def">Parâmetro que divide os logits antes do softmax. Baixa deixa o modelo previsível; alta deixa mais aleatório.</p><p class="g-analogy">Analogia: a quantidade de café que o modelo tomou.</p><p class="g-where">Aparece em: <a href="#m0-4">0.4</a></p></dd></div>
+      <div class="g-entry" id="g-thread-ui"><dt>Thread da UI</dt><dd><p class="g-def">A linha de execução principal do app, que desenha a tela e responde aos toques. Se ela trava, o app inteiro trava.</p><p class="g-analogy">Analogia: o único caixa aberto do mercado.</p><p class="g-where">Aparece em: <a href="#inicio">início</a> e <a href="#m1-5">1.5</a></p></dd></div>
+      <div class="g-entry" id="g-token"><dt>Token</dt><dd><p class="g-def">Pedaço de texto que o modelo lê e gera: uma palavra, parte de palavra ou pontuação. Preço e limite de contexto são contados em tokens.</p><p class="g-analogy">Analogia: as peças de Lego do texto.</p><p class="g-where">Aparece em: <a href="#m0-4">0.4</a></p></dd></div>
+      <div class="g-entry" id="g-tool-calling"><dt>Tool calling</dt><dd><p class="g-def">Recurso em que o modelo devolve um pedido estruturado (nome da função e argumentos em JSON) para o app executar. O modelo não executa nada sozinho.</p><p class="g-analogy">Analogia: o modelo preenche o pedido de compra; quem aprova e paga é o app.</p><p class="g-where">Aparece em: <a href="#m3-4">3.4</a> e <a href="#m9">módulo 9</a></p></dd></div>
+      <div class="g-entry" id="g-truque-maximo"><dt>Truque do máximo</dt><dd><p class="g-def">Subtrair o maior logit de todos antes de calcular exp no softmax. Evita estouro numérico sem mudar o resultado.</p><p class="g-analogy">Analogia: medir a altura de todo mundo a partir do mais alto, em vez de a partir do nível do mar.</p><p class="g-where">Aparece em: <a href="#m0-4">0.4</a></p></dd></div>
+      <div class="g-entry" id="g-widget"><dt>Widget</dt><dd><p class="g-def">Peça básica da interface no Flutter. Texto, botão, espaçamento e até a tela inteira são widgets, encaixados uns dentro dos outros.</p><p class="g-analogy">Analogia: caixas dentro de caixas. A tela é uma caixa grande cheia de caixas menores.</p><p class="g-where">Aparece em: <a href="#m2-1">2.1</a></p></dd></div>
+    </dl>
+  </section>
+
+  <!-- ===================== FONTES ===================== -->
+  <section class="chapter" id="fontes">
+    <h2>Fontes</h2>
+    <p class="chapter-intro">Consultadas para esta parte. Cada módulo novo acrescenta as suas.</p>
+    <ul>
+      <li><a href="https://docs.flutter.dev/">Documentação do Flutter</a>, que reflete o Flutter 3.47 na data da consulta.</li>
+      <li><a href="https://docs.flutter.dev/release/breaking-changes/material-ui-and-cupertino-ui">Migração para material_ui e cupertino_ui</a>.</li>
+      <li><a href="https://flutter.dev/blog/whats-new-in-flutter-3-47">Novidades do Flutter 3.47</a>.</li>
+      <li><a href="https://docs.flutter.dev/install/archive">Arquivo de versões e calendário de lançamentos de 2026</a>.</li>
+      <li><a href="https://pub.dev/packages/riverpod/changelog">Histórico de versões do Riverpod</a>.</li>
+      <li><a href="https://developers.google.com/edge/mediapipe/solutions/genai/llm_inference">Guia do Google para LLMs no aparelho (LiteRT-LM)</a>.</li>
+      <li><a href="https://docs.flutter.dev/resources/glossary">Glossário oficial do Flutter</a>.</li>
+    </ul>
+  </section>
+
+  </div>
+  </main>
+</div>
+
+<div id="tip" role="tooltip" hidden></div>
+<button id="back-btn" class="btn-icon" type="button" hidden data-noexport>Voltar ao texto</button>
+<div id="toast" role="status" aria-live="polite" hidden></div>
+<noscript><p style="padding:16px">Sem JavaScript o conteúdo aparece completo; busca, abas, quizzes e exportação ficam desligados.</p></noscript>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- utilidades ---------- */
+const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+const root = document.documentElement;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const canHover = matchMedia('(hover: hover)').matches;
+const CDN = {
+  hljs: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js',
+  hljsDart: 'https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/dart.min.js',
+  mermaidEsm: 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs',
+  mermaidUmd: 'https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js',
+  turndown: 'https://cdn.jsdelivr.net/npm/turndown@7.2.0/dist/turndown.js',
+  turndownAlt: 'https://unpkg.com/turndown@7.2.0/dist/turndown.js'
+};
+
+// localStorage pode não existir (aba anônima, preview): tudo em try/catch
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('fia:' + k); return v === null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('fia:' + k, JSON.stringify(v)); } catch (e) { /* segue em memória */ } }
+};
+
+const loaded = {};
+function loadScript(src) {
+  if (loaded[src]) return loaded[src];
+  loaded[src] = new Promise((res, rej) => {
+    const s = document.createElement('script');
+    s.src = src; s.async = true;
+    s.onload = () => res();
+    s.onerror = () => { delete loaded[src]; rej(new Error('Falha ao carregar ' + src)); };
+    document.head.appendChild(s);
+  });
+  return loaded[src];
+}
+
+let toastTimer;
+function toast(msg, ms = 4200) {
+  const t = $('#toast'); t.textContent = msg; t.hidden = false;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { t.hidden = true; }, ms);
+}
+
+function download(name, text, type) {
+  const blob = new Blob([text], { type: type + ';charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = name; document.body.appendChild(a); a.click();
+  setTimeout(() => { URL.revokeObjectURL(url); a.remove(); }, 1500);
+}
+
+const norm = s => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+
+/* ---------- tema ---------- */
+function effectiveTheme() {
+  const t = root.getAttribute('data-theme');
+  if (t) return t;
+  return matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+function updateThemeButton() {
+  const dark = effectiveTheme() === 'dark';
+  $('#theme-btn').setAttribute('aria-label', dark ? 'Mudar para o tema claro' : 'Mudar para o tema escuro');
+}
+function initTheme() {
+  updateThemeButton();
+  $('#theme-btn').addEventListener('click', () => {
+    const next = effectiveTheme() === 'dark' ? 'light' : 'dark';
+    root.setAttribute('data-theme', next); store.set('theme', next);
+    updateThemeButton(); Demo.redraw();
+  });
+  matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { updateThemeButton(); Demo.redraw(); });
+}
+
+/* ---------- sumário lateral + scrollspy ---------- */
+function buildToc() {
+  const list = $('#toc-list');
+  $$('main section.chapter').forEach(ch => {
+    const h2 = $(':scope > h2', ch);
+    const li = document.createElement('li'); li.className = 'toc-ch'; li.dataset.target = ch.id;
+    const row = document.createElement('div'); row.className = 'toc-row';
+    if (ch.hasAttribute('data-track')) {
+      const cb = document.createElement('input'); cb.type = 'checkbox'; cb.dataset.done = ch.id;
+      const title = $('.num', h2) ? h2.textContent.replace(/^Módulo\s*\d+:\s*/, '') : h2.textContent;
+      cb.setAttribute('aria-label', 'Marcar "' + title.trim() + '" como concluído');
+      row.appendChild(cb);
+    } else {
+      const sp = document.createElement('span'); sp.className = 'spacer'; row.appendChild(sp);
+    }
+    const a = document.createElement('a'); a.href = '#' + ch.id;
+    const num = $('.num', h2);
+    if (num) {
+      const n = document.createElement('span'); n.className = 'n'; n.textContent = num.textContent.replace(/\D/g, '');
+      a.appendChild(n); a.appendChild(document.createTextNode(' '));
+      a.appendChild(document.createTextNode(h2.textContent.replace(/^Módulo\s*\d+:\s*/, '').trim()));
+    } else a.textContent = h2.textContent.trim();
+    row.appendChild(a); li.appendChild(row);
+    const topics = $$('section.topic', ch);
+    if (topics.length) {
+      const ol = document.createElement('ol');
+      topics.forEach(t => {
+        const h3 = $(':scope > h3', t); if (!h3) return;
+        const li2 = document.createElement('li'); const a2 = document.createElement('a');
+        a2.href = '#' + t.id; a2.textContent = h3.textContent.trim(); li2.appendChild(a2); ol.appendChild(li2);
+      });
+      li.appendChild(ol);
+    }
+    list.appendChild(li);
+  });
+  list.addEventListener('click', e => { if (e.target.closest('a')) closeNav(); });
+}
+
+function initScrollSpy() {
+  const marks = $$('main section.chapter, main section.topic');
+  let ticking = false;
+  const update = () => {
+    ticking = false;
+    const y = (parseFloat(getComputedStyle(root).getPropertyValue('--top-h')) || 60) + 40;
+    let cur = null;
+    for (const m of marks) { if (m.getBoundingClientRect().top <= y) cur = m; else break; }
+    const ch = cur ? (cur.classList.contains('chapter') ? cur : cur.closest('section.chapter')) : null;
+    $$('.toc-ch').forEach(li => li.classList.toggle('active', !!ch && li.dataset.target === ch.id));
+    $$('.toc-ch ol a').forEach(a => {
+      if (cur && cur.classList.contains('topic') && a.getAttribute('href') === '#' + cur.id) a.setAttribute('aria-current', 'location');
+      else a.removeAttribute('aria-current');
+    });
+  };
+  addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(update); } }, { passive: true });
+  update();
+}
+
+function openNav() { document.body.classList.add('nav-open'); $('#menu-btn').setAttribute('aria-expanded', 'true'); }
+function closeNav() { document.body.classList.remove('nav-open'); $('#menu-btn').setAttribute('aria-expanded', 'false'); }
+function initNav() {
+  $('#menu-btn').addEventListener('click', () => document.body.classList.contains('nav-open') ? closeNav() : openNav());
+  $('#scrim').addEventListener('click', closeNav);
+}
+
+/* ---------- progresso ---------- */
+const done = new Set(store.get('done', []));
+function syncProgress() {
+  $$('input[data-done]').forEach(i => { i.checked = done.has(i.dataset.done); });
+  $$('.toc-ch').forEach(li => li.classList.toggle('done', done.has(li.dataset.target)));
+  const tracked = $$('section.chapter[data-track]').map(s => s.id);
+  const n = tracked.filter(id => done.has(id)).length;
+  const p = $('#progress');
+  p.setAttribute('aria-valuemax', String(tracked.length));
+  p.setAttribute('aria-valuenow', String(n));
+  p.style.setProperty('--p', tracked.length ? n / tracked.length : 0);
+  $('#progress-text').textContent = n + ' de ' + tracked.length;
+  p.title = n + ' de ' + tracked.length + ' módulos concluídos';
+}
+function initProgress() {
+  document.addEventListener('change', e => {
+    const i = e.target.closest('input[data-done]'); if (!i) return;
+    if (i.checked) done.add(i.dataset.done); else done.delete(i.dataset.done);
+    store.set('done', [...done]); syncProgress();
+    if (i.checked && done.size === $$('section.chapter[data-track]').length) toast('Guia inteiro concluído. Agora é abrir o editor e fazer o app.');
+  });
+  syncProgress();
+}
+
+/* ---------- abas de código ---------- */
+function selectTab(box, lang) {
+  $$(':scope > figure.code', box).forEach(f => { f.hidden = f.dataset.lang !== lang; });
+  $$(':scope > .tablist > button', box).forEach(b => {
+    const on = b.dataset.lang === lang;
+    b.setAttribute('aria-selected', String(on)); b.tabIndex = on ? 0 : -1;
+  });
+}
+function initCodeTabs() {
+  const pref = store.get('lang', null);
+  $$('.code-tabs').forEach((box, bi) => {
+    const figs = $$(':scope > figure.code', box);
+    const list = document.createElement('div');
+    list.className = 'tablist'; list.setAttribute('role', 'tablist'); list.setAttribute('aria-label', 'Linguagem do exemplo'); list.dataset.noexport = '';
+    figs.forEach((fig, i) => {
+      fig.id = fig.id || ('code-' + bi + '-' + i);
+      const btn = document.createElement('button');
+      btn.type = 'button'; btn.setAttribute('role', 'tab'); btn.id = fig.id + '-tab';
+      btn.setAttribute('aria-controls', fig.id); btn.dataset.lang = fig.dataset.lang;
+      btn.textContent = fig.dataset.label || fig.dataset.lang;
+      fig.setAttribute('role', 'tabpanel'); fig.setAttribute('aria-labelledby', btn.id);
+      btn.addEventListener('click', () => {
+        store.set('lang', fig.dataset.lang);
+        $$('.code-tabs').forEach(b => { if ($$(':scope > figure.code', b).some(f => f.dataset.lang === fig.dataset.lang)) selectTab(b, fig.dataset.lang); });
+      });
+      btn.addEventListener('keydown', e => {
+        const tabs = $$('button', list); const k = tabs.indexOf(btn);
+        let j = null;
+        if (e.key === 'ArrowRight') j = (k + 1) % tabs.length;
+        if (e.key === 'ArrowLeft') j = (k - 1 + tabs.length) % tabs.length;
+        if (e.key === 'Home') j = 0;
+        if (e.key === 'End') j = tabs.length - 1;
+        if (j !== null) { e.preventDefault(); tabs[j].focus(); tabs[j].click(); }
+      });
+      list.appendChild(btn);
+    });
+    box.insertBefore(list, box.firstChild);
+    selectTab(box, pref && figs.some(f => f.dataset.lang === pref) ? pref : figs[0].dataset.lang);
+  });
+}
+
+/* ---------- copiar código e baixar .ipynb ---------- */
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; }
+  catch (e) {
+    const ta = document.createElement('textarea'); ta.value = text; ta.setAttribute('readonly', '');
+    ta.style.position = 'fixed'; ta.style.opacity = '0'; document.body.appendChild(ta); ta.select();
+    let ok = false; try { ok = document.execCommand('copy'); } catch (e2) { ok = false; }
+    ta.remove(); return ok;
+  }
+}
+// Converte o formato "percent" (# %% e # %% [markdown]) em um notebook .ipynb (nbformat 4.5)
+function pyToIpynb(src) {
+  const cells = []; let cur = null;
+  const push = () => {
+    if (!cur) return;
+    while (cur.lines.length && cur.lines[cur.lines.length - 1].trim() === '') cur.lines.pop();
+    while (cur.lines.length && cur.lines[0].trim() === '') cur.lines.shift();
+    if (cur.lines.length) cells.push(cur);
+  };
+  src.replace(/\r\n/g, '\n').split('\n').forEach(line => {
+    const m = line.match(/^# %%(.*)$/);
+    if (m) { push(); cur = { type: /\[markdown\]/.test(m[1]) ? 'markdown' : 'code', lines: [] }; return; }
+    if (!cur) cur = { type: 'code', lines: [] };
+    cur.lines.push(cur.type === 'markdown' ? line.replace(/^# ?/, '') : line);
+  });
+  push();
+  return {
+    cells: cells.map((c, i) => {
+      const cell = { cell_type: c.type, id: 'cell-' + (i + 1), metadata: {}, source: c.lines.map((l, k, a) => k < a.length - 1 ? l + '\n' : l) };
+      if (c.type === 'code') { cell.execution_count = null; cell.outputs = []; }
+      return cell;
+    }),
+    metadata: { kernelspec: { display_name: 'Python 3', language: 'python', name: 'python3' }, language_info: { name: 'python' } },
+    nbformat: 4, nbformat_minor: 5
+  };
+}
+function initCodeTools() {
+  $$('figure.code').forEach(fig => {
+    const code = $(':scope > pre:not(.output) > code', fig); if (!code) return;
+    const bar = document.createElement('div'); bar.className = 'code-tools'; bar.dataset.noexport = '';
+    const copy = document.createElement('button'); copy.type = 'button'; copy.textContent = 'Copiar';
+    copy.addEventListener('click', async () => {
+      const ok = await copyText(code.textContent);
+      copy.textContent = ok ? 'Copiado' : 'Selecione e copie';
+      setTimeout(() => { copy.textContent = 'Copiar'; }, 1600);
+    });
+    bar.appendChild(copy);
+    if (fig.dataset.ipynb) {
+      const nb = document.createElement('button'); nb.type = 'button'; nb.textContent = 'Baixar .ipynb';
+      nb.addEventListener('click', () => download(fig.dataset.ipynb, JSON.stringify(pyToIpynb(code.textContent), null, 1), 'application/x-ipynb+json'));
+      bar.appendChild(nb);
+    }
+    const cap = $(':scope > figcaption', fig);
+    if (cap) cap.after(bar); else fig.prepend(bar);
+  });
+}
+
+/* ---------- realce de sintaxe (CDN, opcional) ---------- */
+function initHighlight() {
+  loadScript(CDN.hljs).then(() => loadScript(CDN.hljsDart).catch(() => {})).then(() => {
+    if (!window.hljs) return;
+    hljs.configure({ ignoreUnescapedHTML: true });
+    $$('pre:not(.output) > code[class*="language-"]').forEach(c => {
+      if (c.classList.contains('language-mermaid')) return;
+      try { hljs.highlightElement(c); } catch (e) { /* fica sem cor, segue legível */ }
+    });
+  }).catch(() => { /* offline: código fica sem cor */ });
+}
+
+/* ---------- diagramas Mermaid: renderiza claro e escuro uma vez ---------- */
+const MM_THEMES = {
+  light: { background: '#FFFFFF', primaryColor: '#FFFFFF', primaryBorderColor: '#1A2233', primaryTextColor: '#1A2233', lineColor: '#566079', secondaryColor: '#E8ECF2', tertiaryColor: '#F4F6F9', edgeLabelBackground: '#FFFFFF', fontSize: '15px' },
+  dark: { background: '#171D28', primaryColor: '#202838', primaryBorderColor: '#E5E9F0', primaryTextColor: '#E5E9F0', lineColor: '#9CA6B8', secondaryColor: '#283142', tertiaryColor: '#171D28', edgeLabelBackground: '#171D28', fontSize: '15px', darkMode: true }
+};
+async function getMermaid() {
+  if (window.mermaid) return window.mermaid;
+  try { const m = await import(CDN.mermaidEsm); window.mermaid = m.default; return window.mermaid; }
+  catch (e) { await loadScript(CDN.mermaidUmd); return window.mermaid; }
+}
+async function initMermaid() {
+  const figs = $$('figure.diagram');
+  if (!figs.length) return;
+  let mermaid;
+  try { mermaid = await getMermaid(); } catch (e) { return; } // offline: o código-fonte do diagrama fica visível
+  if (!mermaid) return;
+  try { await document.fonts.ready; } catch (e) {}
+  const font = getComputedStyle(document.body).fontFamily;
+  const outs = figs.map(fig => {
+    const out = document.createElement('div'); out.className = 'mm-out'; out.setAttribute('role', 'img');
+    const cap = $(':scope > figcaption', fig);
+    out.setAttribute('aria-label', cap ? cap.textContent.trim() : 'Diagrama');
+    out.dataset.noexport = '';
+    return out;
+  });
+  let ok = 0;
+  for (const theme of ['light', 'dark']) {
+    mermaid.initialize({ startOnLoad: false, securityLevel: 'strict', theme: 'base', themeVariables: Object.assign({ fontFamily: font }, MM_THEMES[theme]), flowchart: { curve: 'basis', htmlLabels: true } });
+    for (let i = 0; i < figs.length; i++) {
+      const src = $('pre.mermaid-src > code', figs[i]).textContent;
+      try {
+        const { svg } = await mermaid.render('mm-' + theme + '-' + i, src);
+        const holder = document.createElement('div'); holder.className = 'mm-' + theme; holder.innerHTML = svg;
+        outs[i].appendChild(holder); ok++;
+      } catch (e) { console.warn('Mermaid falhou no diagrama', i, e); }
+    }
+  }
+  figs.forEach((fig, i) => {
+    if (outs[i].children.length === 2) { $('pre.mermaid-src', fig).hidden = true; fig.insertBefore(outs[i], fig.firstChild); }
+  });
+  return ok;
+}
+
+/* ---------- quizzes ---------- */
+function initQuizzes() {
+  const acertos = ['Acertou.', 'Na mosca.', 'Isso aí.', 'Exato.'];
+  $$('.q').forEach((q, qi) => {
+    const opts = $$('.q-options > li', q);
+    const det = $('details', q);
+    const fb = document.createElement('p'); fb.className = 'q-feedback'; fb.dataset.noexport = ''; fb.setAttribute('aria-live', 'polite');
+    opts.forEach(li => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'opt';
+      while (li.firstChild) b.appendChild(li.firstChild);
+      li.appendChild(b);
+      b.addEventListener('click', () => {
+        const right = li.hasAttribute('data-correct');
+        opts.forEach(o => o.classList.remove('right', 'wrong'));
+        opts.forEach(o => { if (o.hasAttribute('data-correct')) o.classList.add('right'); });
+        if (!right) li.classList.add('wrong');
+        fb.className = 'q-feedback ' + (right ? 'ok' : 'no');
+        fb.textContent = right ? acertos[qi % acertos.length] : 'Quase. A certa está marcada; a explicação abriu logo abaixo.';
+        if (det) det.open = true;
+      });
+    });
+    $('.q-options', q).after(fb);
+  });
+}
+
+/* ---------- glossário: ordem alfabética, letras e dicas ---------- */
+function initGlossary() {
+  const list = $('#glossario-lista'); if (!list) return;
+  const entries = $$(':scope > .g-entry', list);
+  entries.sort((a, b) => $('dt', a).textContent.localeCompare($('dt', b).textContent, 'pt-BR', { sensitivity: 'base' }));
+  entries.forEach(e => list.appendChild(e));
+  const nav = $('#glossario-letras'); const seen = new Set();
+  entries.forEach(e => {
+    const L = norm($('dt', e).textContent.trim()[0]).toUpperCase();
+    if (seen.has(L)) return; seen.add(L);
+    const a = document.createElement('a'); a.href = '#' + e.id; a.textContent = L; nav.appendChild(a);
+  });
+  // aviso para quem escreve: termo sem verbete
+  $$('a.term').forEach(a => { if (!document.getElementById(a.getAttribute('href').slice(1))) console.warn('Termo sem verbete no glossário:', a.getAttribute('href')); });
+}
+
+const tip = () => $('#tip');
+let tipFor = null;
+function showTip(a, touch) {
+  const entry = document.getElementById(a.getAttribute('href').slice(1)); if (!entry) return;
+  const t = tip(); t.textContent = '';
+  const s = document.createElement('strong'); s.textContent = $('dt', entry).textContent; t.appendChild(s);
+  const d = document.createElement('p'); d.textContent = ($('.g-def', entry) || {}).textContent || ''; t.appendChild(d);
+  const an = $('.g-analogy', entry);
+  if (an) { const p = document.createElement('p'); p.className = 'an'; p.textContent = an.textContent; t.appendChild(p); }
+  if (touch || !canHover) { const p = document.createElement('p'); p.className = 'an'; p.textContent = 'Toque de novo para abrir no glossário.'; t.appendChild(p); }
+  t.hidden = false;
+  const r = a.getBoundingClientRect(); const w = t.offsetWidth; const h = t.offsetHeight;
+  let left = r.left + scrollX; left = Math.max(scrollX + 12, Math.min(left, scrollX + innerWidth - w - 12));
+  let top = r.bottom + scrollY + 8; if (r.bottom + h + 16 > innerHeight && r.top > h + 16) top = r.top + scrollY - h - 8;
+  t.style.left = left + 'px'; t.style.top = top + 'px';
+  a.setAttribute('aria-describedby', 'tip'); tipFor = a;
+}
+function hideTip() { const t = tip(); t.hidden = true; if (tipFor) tipFor.removeAttribute('aria-describedby'); tipFor = null; }
+
+let backY = null;
+let lastPointer = 'mouse';
+function initTerms() {
+  document.addEventListener('pointerdown', e => { lastPointer = e.pointerType || 'mouse'; }, true);
+  document.addEventListener('keydown', () => { lastPointer = 'keyboard'; }, true);
+  document.addEventListener('mouseover', e => { const a = e.target.closest && e.target.closest('a.term'); if (a && canHover && lastPointer === 'mouse' && a !== tipFor) showTip(a); });
+  document.addEventListener('mouseout', e => { const a = e.target.closest && e.target.closest('a.term'); if (a && canHover && !a.contains(e.relatedTarget)) hideTip(); });
+  document.addEventListener('focusin', e => { if (lastPointer !== 'touch' && lastPointer !== 'pen' && e.target.matches && e.target.matches('a.term')) showTip(e.target); });
+  document.addEventListener('focusout', e => { if (e.target.matches && e.target.matches('a.term')) hideTip(); });
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a.term');
+    if (a) {
+      const touch = !canHover || lastPointer === 'touch' || lastPointer === 'pen';
+      if (touch && tipFor !== a) { e.preventDefault(); showTip(a, true); return; }
+      hideTip(); backY = scrollY; $('#back-btn').hidden = false; return;
+    }
+    if (!e.target.closest('#tip')) hideTip();
+  });
+  addEventListener('resize', hideTip);
+  $('#back-btn').addEventListener('click', () => {
+    if (backY !== null) scrollTo({ top: backY, behavior: reduceMotion ? 'auto' : 'smooth' });
+    backY = null; $('#back-btn').hidden = true;
+  });
+}
+
+/* ---------- busca ---------- */
+let index = [];
+function buildIndex() {
+  index = [];
+  $$('main section.chapter, main section.topic').forEach(sec => {
+    const h = $(':scope > h2, :scope > h3', sec); if (!h) return;
+    let el = sec;
+    if (sec.classList.contains('chapter')) { el = sec.cloneNode(true); $$('section.topic, #glossario-lista', el).forEach(n => n.remove()); }
+    const raw = el.textContent.replace(/\s+/g, ' ').trim();
+    const ch = sec.classList.contains('topic') ? sec.closest('section.chapter') : null;
+    index.push({ id: sec.id, title: h.textContent.trim(), where: ch ? $(':scope > h2', ch).textContent.trim() : 'Capítulo', raw, n: norm(raw), nt: norm(h.textContent) });
+  });
+  $$('.g-entry').forEach(e => {
+    const raw = e.textContent.replace(/\s+/g, ' ').trim();
+    index.push({ id: e.id, title: $('dt', e).textContent.trim(), where: 'Glossário', raw, n: norm(raw), nt: norm($('dt', e).textContent) });
+  });
+}
+function snippet(item, words) {
+  let at = -1;
+  for (const w of words) { const k = item.n.indexOf(w); if (k >= 0 && (at < 0 || k < at)) at = k; }
+  const start = Math.max(0, at - 50), end = Math.min(item.raw.length, Math.max(at, 0) + 110);
+  const frag = document.createDocumentFragment();
+  const text = (start > 0 ? '…' : '') + item.raw.slice(start, end) + (end < item.raw.length ? '…' : '');
+  const ntext = norm(text);
+  // marca as ocorrências (a normalização mantém o tamanho para texto já composto)
+  const marks = [];
+  words.forEach(w => { let k = ntext.indexOf(w); while (k >= 0) { marks.push([k, k + w.length]); k = ntext.indexOf(w, k + w.length); } });
+  marks.sort((a, b) => a[0] - b[0]);
+  let pos = 0;
+  marks.forEach(([a, b]) => {
+    if (a < pos) return;
+    frag.appendChild(document.createTextNode(text.slice(pos, a)));
+    const m = document.createElement('mark'); m.textContent = text.slice(a, b); frag.appendChild(m); pos = b;
+  });
+  frag.appendChild(document.createTextNode(text.slice(pos)));
+  return frag;
+}
+function runSearch(q) {
+  const box = $('#search-results'); const input = $('#search-input');
+  const words = norm(q).split(/\s+/).filter(w => w.length > 1);
+  box.textContent = '';
+  if (!words.length) { box.hidden = true; input.setAttribute('aria-expanded', 'false'); return; }
+  const hits = index.map(it => {
+    if (!words.every(w => it.n.includes(w))) return null;
+    let score = 0;
+    words.forEach(w => { if (it.nt.includes(w)) score += 10; score += Math.min(5, it.n.split(w).length - 1); });
+    if (it.where === 'Glossário') score += 2;
+    return { it, score };
+  }).filter(Boolean).sort((a, b) => b.score - a.score).slice(0, 12);
+  if (!hits.length) {
+    const p = document.createElement('p'); p.className = 'search-empty';
+    p.textContent = 'Nada encontrado para "' + q.trim() + '". Tente outro termo, como isolate, softmax ou proxy.';
+    box.appendChild(p);
+  }
+  hits.forEach(({ it }) => {
+    const a = document.createElement('a'); a.className = 'result'; a.href = '#' + it.id; a.setAttribute('role', 'option');
+    const w = document.createElement('span'); w.className = 'r-where'; w.textContent = it.where;
+    const t = document.createElement('span'); t.className = 'r-title'; t.textContent = it.title;
+    const s = document.createElement('span'); s.className = 'r-snip'; s.appendChild(snippet(it, words));
+    a.append(w, t, s);
+    a.addEventListener('click', () => { closeSearch(); closeNav(); });
+    box.appendChild(a);
+  });
+  box.hidden = false; input.setAttribute('aria-expanded', 'true');
+}
+function closeSearch() { $('#search-results').hidden = true; $('#search-input').setAttribute('aria-expanded', 'false'); }
+function initSearch() {
+  const input = $('#search-input'); const box = $('#search-results');
+  let t;
+  input.addEventListener('input', () => { clearTimeout(t); t = setTimeout(() => runSearch(input.value), 120); });
+  input.addEventListener('focus', () => { if (input.value.trim()) runSearch(input.value); });
+  input.addEventListener('keydown', e => {
+    if (e.key === 'ArrowDown') { const f = $('.result', box); if (f) { e.preventDefault(); f.focus(); } }
+    if (e.key === 'Enter') { const f = $('.result', box); if (f) { e.preventDefault(); f.click(); location.hash = f.getAttribute('href'); } }
+  });
+  box.addEventListener('keydown', e => {
+    const items = $$('.result', box); const k = items.indexOf(document.activeElement);
+    if (e.key === 'ArrowDown' && k < items.length - 1) { e.preventDefault(); items[k + 1].focus(); }
+    if (e.key === 'ArrowUp') { e.preventDefault(); if (k > 0) items[k - 1].focus(); else input.focus(); }
+  });
+  document.addEventListener('click', e => { if (!e.target.closest('.search')) closeSearch(); });
+  document.addEventListener('keydown', e => {
+    const typing = /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) || document.activeElement.isContentEditable;
+    if (e.key === '/' && !typing) { e.preventDefault(); input.focus(); input.select(); }
+    if (e.key === 'Escape') { closeSearch(); hideTip(); closeNav(); if (document.activeElement === input) input.blur(); }
+  });
+}
+
+/* ---------- impressão / PDF ---------- */
+let reopened = [];
+function initPrint() {
+  $('#print-btn').addEventListener('click', () => window.print());
+  addEventListener('beforeprint', () => { reopened = $$('details:not([open])'); reopened.forEach(d => { d.open = true; }); hideTip(); });
+  addEventListener('afterprint', () => { reopened.forEach(d => { d.open = false; }); reopened = []; });
+}
+
+/* ---------- exportar Markdown ---------- */
+function cleanCloneForExport() {
+  const c = $('main .content').cloneNode(true);
+  $$('button.opt', c).forEach(b => b.replaceWith(...b.childNodes));          // quiz: opções viram texto
+  $$('.mm-out', c).forEach(n => n.remove());                                  // diagrama renderizado sai...
+  $$('pre.mermaid-src', c).forEach(p => p.removeAttribute('hidden'));         // ...e o código Mermaid fica
+  $$('figure.code[hidden]', c).forEach(f => f.removeAttribute('hidden'));     // todas as abas entram
+  $$('[data-noexport], button, input, #tip, script, style', c).forEach(n => n.remove());
+  $$('a[href^="#"]', c).forEach(a => { if (a.classList.contains('term')) a.removeAttribute('class'); });
+  return c;
+}
+function cellText(td) { return td.textContent.replace(/\s+/g, ' ').trim().replace(/\|/g, '\\|'); }
+function tableToMd(table) {
+  const rows = $$('tr', table).map(tr => $$('th,td', tr).map(cellText));
+  if (!rows.length) return '';
+  const head = rows[0]; const body = rows.slice(1);
+  const line = r => '| ' + r.join(' | ') + ' |';
+  return '\n\n' + [line(head), line(head.map(() => '---')), ...body.map(line)].join('\n') + '\n\n';
+}
+// Conversor reserva, usado quando o Turndown não carrega (sem internet)
+function miniMarkdown(el) {
+  const inline = node => {
+    let s = '';
+    node.childNodes.forEach(n => {
+      if (n.nodeType === 3) { s += n.nodeValue.replace(/\s+/g, ' '); return; }
+      if (n.nodeType !== 1) return;
+      const t = n.tagName; const inner = inline(n);
+      if (t === 'STRONG' || t === 'B') s += '**' + inner.trim() + '**';
+      else if (t === 'EM' || t === 'I') s += '_' + inner.trim() + '_';
+      else if (t === 'CODE' || t === 'KBD') s += '`' + n.textContent + '`';
+      else if (t === 'A') s += '[' + inner.trim() + '](' + n.getAttribute('href') + ')';
+      else if (t === 'BR') s += '  \n';
+      else if (t === 'SUP') s += '^' + inner;
+      else s += inner;
+    });
+    return s;
+  };
+  const out = [];
+  const list = (ol, depth) => {
+    const ordered = ol.tagName === 'OL'; let i = 1;
+    $$(':scope > li', ol).forEach(li => {
+      const clone = li.cloneNode(true); $$('ul,ol', clone).forEach(x => x.remove());
+      out.push('  '.repeat(depth) + (ordered ? (i++) + '. ' : '- ') + inline(clone).trim());
+      $$(':scope > ul, :scope > ol', li).forEach(sub => list(sub, depth + 1));
+    });
+    out.push('');
+  };
+  const walk = node => {
+    node.childNodes.forEach(n => {
+      if (n.nodeType === 3) { const t = n.nodeValue.trim(); if (t) out.push(t, ''); return; }
+      if (n.nodeType !== 1) return;
+      const t = n.tagName;
+      if (/^H[1-6]$/.test(t)) out.push('#'.repeat(+t[1]) + ' ' + inline(n).trim(), '');
+      else if (t === 'P' && n.classList.contains('formula')) out.push('`' + n.textContent.trim() + '`', '');
+      else if (t === 'P' || t === 'FIGCAPTION') out.push((t === 'FIGCAPTION' ? '_' + inline(n).trim() + '_' : inline(n).trim()), '');
+      else if (t === 'SUMMARY' || t === 'DT') out.push('**' + inline(n).trim() + '**', '');
+      else if (t === 'PRE') {
+        const code = $('code', n) || n; const m = (code.className || '').match(/language-(\S+)/);
+        out.push('```' + (m ? m[1] : ''), code.textContent.replace(/\n$/, ''), '```', '');
+      }
+      else if (t === 'UL' || t === 'OL') list(n, 0);
+      else if (t === 'TABLE') out.push(tableToMd(n).trim(), '');
+      else walk(n);
+    });
+  };
+  walk(el);
+  return out.join('\n').replace(/\n{3,}/g, '\n\n');
+}
+async function getTurndown() {
+  if (window.TurndownService) return window.TurndownService;
+  try { await loadScript(CDN.turndown); } catch (e) { try { await loadScript(CDN.turndownAlt); } catch (e2) { return null; } }
+  return window.TurndownService || null;
+}
+async function exportMarkdown() {
+  const clone = cleanCloneForExport();
+  const TD = await getTurndown();
+  let md;
+  if (TD) {
+    const td = new TD({ headingStyle: 'atx', codeBlockStyle: 'fenced', bulletListMarker: '-', emDelimiter: '_' });
+    td.addRule('tabela', { filter: 'table', replacement: (c, node) => tableToMd(node) });
+    td.addRule('formula', { filter: node => node.nodeName === 'P' && node.classList.contains('formula'), replacement: (c, node) => '\n\n`' + node.textContent.trim() + '`\n\n' });
+    td.addRule('legenda', { filter: 'figcaption', replacement: c => '\n\n_' + c.trim() + '_\n\n' });
+    td.addRule('termo', { filter: ['dt', 'summary'], replacement: c => '\n\n**' + c.trim() + '**\n\n' });
+    td.addRule('kbd', { filter: 'kbd', replacement: c => '`' + c + '`' });
+    md = td.turndown(clone);
+  } else {
+    md = miniMarkdown(clone);
+    toast('Sem internet para carregar o Turndown: usei o conversor reserva do próprio guia.');
+  }
+  md = md.replace(/\n{3,}/g, '\n\n').trim() + '\n';
+  download('flutter-com-ia-no-bolso.md', md, 'text/markdown');
+}
+function initExport() {
+  $('#export-md').addEventListener('click', () => { exportMarkdown().catch(err => { console.error(err); toast('Não consegui gerar o Markdown. Abra o console do navegador para ver o motivo.'); }); });
+}
+
+/* ---------- demo: thread principal x Isolate ---------- */
+const Demo = (() => {
+  const TOKENS = ['Você', ' gastou', ' R$ 1.284,90', ' com', ' mercado', ' em', ' outubro.', ' Isso', ' é', ' 18%', ' a', ' mais', ' que', ' setembro.'];
+  const WORK_MS = 110; // "custo" de cada token; 14 tokens dão cerca de 1,5 s
+  const WORKER_SRC = 'self.onmessage=function(e){var t=e.data.tokens,ms=e.data.ms;for(var i=0;i<t.length;i++){var s=performance.now();while(performance.now()-s<ms){}self.postMessage({token:t[i]});}self.postMessage({done:true});};';
+  let canvas, ctx, frames = [], running = false, stopAt = 0, last = 0, angle = 0, frameNo = 0, maxGap = 0, lost = 0, busy = false;
+  const el = id => document.getElementById(id);
+
+  function colors() { const cs = getComputedStyle(root); return { ok: cs.getPropertyValue('--muted').trim(), bad: cs.getPropertyValue('--jank').trim(), line: cs.getPropertyValue('--ink').trim(), bg: cs.getPropertyValue('--sunken').trim() }; }
+  function size() {
+    if (!canvas) return;
+    const dpr = Math.min(devicePixelRatio || 1, 2); const w = canvas.clientWidth || 260; const h = canvas.clientHeight || 64;
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  }
+  function draw() {
+    if (!ctx) return;
+    const w = canvas.clientWidth, h = canvas.clientHeight, c = colors();
+    ctx.clearRect(0, 0, w, h);
+    const cap = 120; // ms no topo do gráfico
+    const n = 150, bw = w / n;
+    const data = frames.slice(-n);
+    data.forEach((dt, i) => {
+      const bh = Math.max(1.5, Math.min(dt, cap) / cap * (h - 6));
+      ctx.fillStyle = dt > 25 ? c.bad : c.ok;
+      ctx.fillRect(i * bw + 0.5, h - bh, Math.max(1, bw - 1), bh);
+    });
+    const y = h - (16.7 / cap) * (h - 6);
+    ctx.strokeStyle = c.line; ctx.globalAlpha = .6; ctx.setLineDash([4, 3]);
+    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+    ctx.fillStyle = c.line; ctx.font = '11px ' + getComputedStyle(document.body).fontFamily;
+    ctx.fillText('16,7 ms', 6, y - 4);
+  }
+  function loop(t) {
+    if (last) {
+      const dt = t - last; frames.push(dt); if (frames.length > 240) frames.shift();
+      if (dt > maxGap) maxGap = dt;
+      lost += Math.max(0, Math.round(dt / 16.67) - 1);
+    }
+    last = t; frameNo++;
+    if (!reduceMotion) { angle = (angle + 7) % 360; el('demo-spinner').style.transform = 'rotate(' + angle + 'deg)'; }
+    el('demo-frame').textContent = String(frameNo);
+    el('demo-max').textContent = Math.round(maxGap).toLocaleString('pt-BR') + ' ms';
+    el('demo-lost').textContent = lost.toLocaleString('pt-BR');
+    draw();
+    if (running || t < stopAt) requestAnimationFrame(loop); else last = 0;
+  }
+  function start() {
+    frames = []; maxGap = 0; lost = 0; last = 0;
+    const wasIdle = !running && performance.now() >= stopAt;
+    running = true; stopAt = 0;
+    if (wasIdle) requestAnimationFrame(loop);
+  }
+  function finish(msg, kind) {
+    running = false; stopAt = performance.now() + 700; busy = false;
+    el('run-main').disabled = false; el('run-iso').disabled = false;
+    const s = el('demo-status'); s.className = kind; s.textContent = msg;
+  }
+  function begin(msg) {
+    busy = true; el('run-main').disabled = true; el('run-iso').disabled = true;
+    el('demo-answer').textContent = ''; const s = el('demo-status'); s.className = ''; s.textContent = msg;
+    start();
+  }
+  function runMain() {
+    if (busy) return;
+    begin('Gerando na thread principal…');
+    // espera alguns quadros para a bolinha girar antes do congelamento
+    setTimeout(() => {
+      const t0 = performance.now(); let text = '';
+      for (const tok of TOKENS) { const s = performance.now(); while (performance.now() - s < WORK_MS) { /* "inferência" */ } text += tok; }
+      el('demo-answer').textContent = text;
+      const took = Math.round(performance.now() - t0);
+      finish('A tela ficou congelada por ' + took.toLocaleString('pt-BR') + ' ms: nenhum toque, nenhuma animação, e a resposta chegou de uma vez. No celular, é o usuário sacudindo o aparelho achando que travou.', 'jank');
+    }, 350);
+  }
+  function runIsolate() {
+    if (busy) return;
+    begin('Gerando num Isolate (aqui, um Web Worker)…');
+    let w = null;
+    try { w = new Worker(URL.createObjectURL(new Blob([WORKER_SRC], { type: 'text/javascript' }))); } catch (e) { w = null; }
+    const ok = 'Pronto, e a bolinha não parou. O trabalho pesado rodou em outra linha de execução e mandou os tokens por mensagem, um a um. É o que o Isolate faz no Dart.';
+    if (!w) { simulate(ok); return; }
+    w.onmessage = e => {
+      if (e.data.token) el('demo-answer').textContent += e.data.token;
+      if (e.data.done) { w.terminate(); finish(ok, 'device'); }
+    };
+    w.onerror = () => { try { w.terminate(); } catch (e) {} simulate(ok); };
+    w.postMessage({ tokens: TOKENS, ms: WORK_MS });
+  }
+  // Reserva para navegadores que bloqueiam Worker: espera sem ocupar a thread (simulação)
+  function simulate(ok) {
+    let i = 0;
+    const next = () => {
+      if (i < TOKENS.length) { el('demo-answer').textContent += TOKENS[i++]; setTimeout(next, WORK_MS); }
+      else finish(ok + ' (Este navegador bloqueou o Worker, então a espera foi simulada.)', 'device');
+    };
+    next();
+  }
+  function init() {
+    canvas = el('demo-meter'); if (!canvas) return;
+    ctx = canvas.getContext('2d'); size(); draw();
+    el('run-main').addEventListener('click', runMain);
+    el('run-iso').addEventListener('click', runIsolate);
+    addEventListener('resize', () => { size(); draw(); });
+  }
+  return { init, redraw: () => draw() };
+})();
+
+/* ---------- partida ---------- */
+function init() {
+  initTheme();
+  initGlossary();
+  buildToc();
+  initNav();
+  initProgress();
+  initCodeTabs();
+  initCodeTools();
+  initQuizzes();
+  initTerms();
+  buildIndex();
+  initSearch();
+  initPrint();
+  initExport();
+  initScrollSpy();
+  Demo.init();
+  initHighlight();
+  initMermaid();
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init); else init();
+})();
+</script>
+</body>
+</html>
