@@ -9,6 +9,7 @@ Repositório de cadernos e laboratórios interativos focados no aprendizado prá
 | Guia | Arquivo Principal | Descrição | Documentação |
 | :--- | :--- | :--- | :--- |
 | **Laboratório Rust** | [`guias/rust/laboratorio_rust.html`](guias/rust/laboratorio_rust.html) | Caderno interativo com 35 capítulos: os 23 temas do Guia Completo de Rust na Parte A, integração com Python (PyO3/maturin), trading algorítmico, sistemas IoT embarcados e simuladores em tempo real. | [Guia de uso](guias/rust/README.md) |
+| **Rust Embarcado** | [`guias/rust_embarcados/rust-embarcado.html`](guias/rust_embarcados/rust-embarcado.html) | 23 capítulos de eletrônica e ESP32-C3, sete projetos, 15 calculadoras e simuladores, 70 perguntas e práticas de produção e GitHub. | [Guia de uso](guias/rust_embarcados/README.md) |
 | **Flutter com IA no bolso** | [`guias/flutter/laboratorio_flutter.html`](guias/flutter/laboratorio_flutter.html) | Guia de Flutter, Dart e IA: módulo 0 disponível com softmax em Dart/Python/Go, demo de concorrência, quizzes e exportações; módulos 1 a 13 planejados. | [Guia de uso](guias/flutter/README.md) |
 | **Laboratório LeetCode** | [`guias/leet_code/laboratorio_leet_code.html`](guias/leet_code/laboratorio_leet_code.html) | 18 capítulos de algoritmos com 33 problemas, 99 soluções em Python/Rust/Go, seis simuladores, quizzes e treino de entrevista. | [Guia de uso](guias/leet_code/README.md) |
 | **Laboratório Kotlin & Android** | [`guias/android_kotlin/laboratorio_kotlin_android.html`](guias/android_kotlin/laboratorio_kotlin_android.html) | 16 práticas com 32 novos programas Kotlin, diagramas, quizzes, simuladores e fragmentos de integração Android. | [Guia de uso](guias/android_kotlin/README.md) |
@@ -33,6 +34,7 @@ python3 -m http.server 8000 --bind 127.0.0.1
 Abra o navegador no endereço:
 
 - **Rust:** [http://localhost:8000/guias/rust/laboratorio_rust.html](http://localhost:8000/guias/rust/laboratorio_rust.html)
+- **Rust Embarcado:** [http://localhost:8000/guias/rust_embarcados/rust-embarcado.html](http://localhost:8000/guias/rust_embarcados/rust-embarcado.html)
 - **Flutter:** [http://localhost:8000/guias/flutter/laboratorio_flutter.html](http://localhost:8000/guias/flutter/laboratorio_flutter.html)
 - **LeetCode:** [http://localhost:8000/guias/leet_code/laboratorio_leet_code.html](http://localhost:8000/guias/leet_code/laboratorio_leet_code.html)
 - **Kotlin/Android:** [http://localhost:8000/guias/android_kotlin/laboratorio_kotlin_android.html](http://localhost:8000/guias/android_kotlin/laboratorio_kotlin_android.html)
@@ -70,6 +72,8 @@ Start-Process "guias\rust\laboratorio_rust.html"
 Ou simplesmente dê duplo-clique no arquivo através do gerenciador de arquivos.
 
 Os comandos acima abrem o laboratório Rust. Para Flutter, use `guias/flutter/laboratorio_flutter.html`; para LeetCode, use `guias/leet_code/laboratorio_leet_code.html`. Para Kotlin/Android, use `guias/android_kotlin/laboratorio_kotlin_android.html`. Consulte as instruções específicas de [Flutter](guias/flutter/README.md), [LeetCode](guias/leet_code/README.md) e [Kotlin/Android](guias/android_kotlin/README.md).
+
+Para Rust Embarcado, abra `guias/rust_embarcados/rust-embarcado.html` e consulte seu [guia de uso](guias/rust_embarcados/README.md).
 
 ---
 
@@ -120,6 +124,18 @@ maturin develop --release
 
 ---
 
+## 🔌 Eletrônica e Rust Embarcado
+
+O caderno de Rust Embarcado reúne 23 capítulos sobre eletrônica, ESP32-C3, firmware, web e produção. São sete projetos, 15 calculadoras e simuladores em JavaScript, 70 perguntas e uma biblioteca `calc` que pode ser testada no PC e compilada sem `std`. Os exemplos distinguem os projetos com esp-hal dos que usam esp-idf-svc.
+
+Consulte o [guia de uso de Rust Embarcado](guias/rust_embarcados/README.md) e o [relatório de revisão](guias/rust_embarcados/REVISAO.md). Com Python, Beautiful Soup, Playwright, Rust e Chrome/Chromium instalados, execute na raiz:
+
+```bash
+python3 guias/rust_embarcados/validar_laboratorio.py
+```
+
+O validador verifica estrutura, exemplos locais e interações no navegador. A compilação dos projetos embarcados e os testes em Wokwi/placa precisam ser feitos no ambiente descrito no guia.
+
 ## 📱 Exemplos do Guia de Flutter
 
 O módulo 0 contém exemplos executáveis de softmax e temperatura em Dart puro, Python com NumPy e Go. O HTML também oferece comparação entre thread principal e Web Worker, busca, glossário, tema, progresso, três quizzes, download de notebook e exportação Markdown/PDF.
@@ -160,20 +176,23 @@ python3 guias/android_kotlin/validar_laboratorio.py
 
 ## Onde o progresso fica salvo
 
-Os quatro HTMLs salvam automaticamente no **`localStorage` do perfil do navegador**, no próprio computador. Os dados continuam disponíveis após fechar e reiniciar o navegador; nenhum arquivo de progresso é criado no projeto e nenhum dado é enviado a um servidor.
+Os cinco HTMLs salvam automaticamente no **`localStorage` do perfil do navegador**, no próprio computador. Os dados continuam disponíveis após fechar e reiniciar o navegador; nenhum arquivo de progresso é criado no projeto e nenhum dado de progresso é enviado a um servidor.
 
 | Guia | Chaves no `localStorage` |
 | :--- | :--- |
 | Rust | `labrs:done` (capítulos concluídos), `labrs:reading` (ponto da leitura), `labrs:quiz:<id>` (respostas), `labrs:treino:placar` e `labrs:treino:ativos` (treino), `labrs:tema` e `labrs:lang` (preferências) |
+| Rust Embarcado | `rsemb:done` (conclusões manuais), `rsemb:quiz:<id>` (respostas), `rsemb:treino:placar` e `rsemb:treino:ativos` (treino), `rsemb:tema` e `rsemb:trilha` (preferências) |
 | Flutter | `fia:done` (módulos concluídos), `fia:reading` (ponto da leitura), `fia:quiz:<id>` (respostas), `fia:theme` e `fia:lang` (preferências) |
 | LeetCode | `lablc:done` (capítulos concluídos), `lablc:reading` (ponto da leitura), `lablc:quiz:<id>` (respostas), `lablc:treino:placar` e `lablc:treino:ativos` (treino), `lablc:tema` e `lablc:lang` (preferências) |
 | Kotlin/Android | `kia:done` (conclusões manuais), `kia:reading` (leitura), `kia:quiz:<id>` (respostas), `kia:theme` e `kia:lang` (preferências) |
 
-Os quatro guias retomam a leitura ao reabrir sem uma âncora (`#capitulo`) no endereço, usando o ponto salvo. Links para um capítulo específico têm prioridade. As marcações e respostas são salvas imediatamente; a posição é salva durante a rolagem e ao sair da página.
+Os guias de Rust, Flutter, LeetCode e Kotlin/Android retomam a leitura ao reabrir sem uma âncora (`#capitulo`) no endereço, usando o ponto salvo. Links para um capítulo específico têm prioridade. As marcações e respostas são salvas imediatamente; a posição é salva durante a rolagem e ao sair da página.
 
 Nos guias de Rust, Flutter e LeetCode, ao rolar para baixo até o final de um capítulo ou módulo entrar na tela, ele é marcado automaticamente como concluído e salvo. As caixas de conclusão continuam disponíveis para marcar ou desmarcar manualmente. Abrir o guia no meio ou saltar para outro capítulo não conclui os anteriores automaticamente.
 
 No laboratório Kotlin/Android, as conclusões continuam manuais; ponto de leitura e respostas dos quizzes também são persistidos.
+
+No Rust Embarcado, as conclusões são manuais e as respostas dos quizzes ficam salvas. Este guia não salva o ponto de rolagem; a preferência de trilha e o placar do treino final também são persistidos.
 
 Para consultar os dados, abra as ferramentas do navegador (**F12 → Application/Aplicativo → Local Storage/Armazenamento local**) e selecione o endereço do guia.
 

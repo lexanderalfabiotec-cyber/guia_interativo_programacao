@@ -382,6 +382,7 @@ figure.diagram figcaption{font-size:.84rem;color:var(--muted);margin-top:6px}
 .foot{color:var(--muted);font-size:.86rem;padding:40px 0 0}
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important;scroll-behavior:auto!important}}
 </style>
+<noscript><style>.tabpanel[hidden]{display:block!important}</style></noscript>
 </head><body>
 
 <header class="topbar">
@@ -395,7 +396,7 @@ figure.diagram figcaption{font-size:.84rem;color:var(--muted);margin-top:6px}
 <div class="scrim" id="scrim"></div>
 <div class="layout">
 <nav class="toc" id="toc" aria-label="Capítulos">
-  <div class="toc-progress"><b id="prog-n">0</b> <small>de <span id="prog-total">0</span> capítulos estudados</small><div class="bar"><i id="prog-bar"></i></div>
+  <div class="toc-progress"><b id="prog-n">0</b> <small>de <span id="prog-total">0</span> capítulos estudados</small><div class="bar"><i id="prog-bar"></i></div><small id="storage-warning" role="status" hidden>Armazenamento indisponível ou dados inválidos: as alterações podem não ficar salvas.</small>
   <input class="toc-filter" id="toc-filter" type="search" placeholder="Filtrar capítulos" aria-label="Filtrar capítulos"></div>
   <ul class="toc-list">
 <li class="toc-part">A · Comece aqui</li>
@@ -683,7 +684,7 @@ elf = &quot;target/riscv32imc-unknown-none-elf/release/pisca-led&quot;</code></p
 # Crystal frequency: 40 MHz
 # Flash size:        4MB
 # Features:          WiFi, BLE
-# MAC address:       xx:xx:xx:xx:xx:xx</code></pre></figure></div><div class="tabpanel" role="tabpanel" hidden><figure class="code"><figcaption><span class="lang">sh</span><span class="ttl">terminal</span><button class="copy" type="button">Copiar</button></figcaption><pre><code class="language-bash">rustc --version          # 1.86 ou mais novo
+# MAC address:       xx:xx:xx:xx:xx:xx</code></pre></figure></div><div class="tabpanel" role="tabpanel" hidden><figure class="code"><figcaption><span class="lang">sh</span><span class="ttl">terminal</span><button class="copy" type="button">Copiar</button></figcaption><pre><code class="language-bash">rustc --version          # use a versão exigida pelo projeto gerado (rust-version)
 espflash --version
 esp-generate --version
 rustup target list --installed   # deve listar riscv32imc-unknown-none-elf</code></pre></figure></div><div class="tabpanel" role="tabpanel" hidden><figure class="code"><figcaption><span class="lang">txt</span><span class="ttl">problemas comuns</span><button class="copy" type="button">Copiar</button></figcaption><pre><code class="language-text">&quot;Permission denied /dev/ttyACM0&quot;  → falta o grupo dialout (Linux); saia e entre na sessão
@@ -801,9 +802,17 @@ print(f&quot;R mínimo para 1/4 W: {v**2/0.25:.0f} ohms&quot;)</code></pre></fig
 
 /// Menor valor comercial maior ou igual a `ohms`.
 pub fn comercial_acima(ohms: f32, serie: &amp;[f32]) -&gt; f32 {
+    // Série crescente, com bases entre 1 (inclusive) e 10 (exclusive).
+    if !ohms.is_finite() || ohms &lt;= 0.0 || serie.is_empty()
+        || serie.iter().any(|b| !b.is_finite() || *b &lt; 1.0 || *b &gt;= 10.0)
+        || serie.windows(2).any(|p| p[0] &gt;= p[1]) { return f32::NAN; }
     let mut decada = 1.0_f32;
     while decada * 10.0 &lt;= ohms { decada *= 10.0; }   // acha a década: 100 para 130 Ω
-    while decada &gt; ohms { decada /= 10.0; }
+    while decada &gt; ohms {
+        let menor = decada / 10.0;
+        if menor == 0.0 { return ohms; } // menor subnormal representável
+        decada = menor;
+    }
     for &amp;base in serie {
         let v = base * decada;
         if v &gt;= ohms * 0.9999 { return v; }
@@ -844,6 +853,7 @@ Paralelo: ──┬─[R1]─┬──       as duas pernas de cada um nas MESMA
 <p>Em placas prontas, como módulos de sensor, os resistores são pequenos demais para faixas. O código de 3 dígitos funciona como as faixas: dois dígitos e o número de zeros.</p>
 <div class="tabs"><div class="tablist" role="tablist"><button class="tab" role="tab" type="button" data-lang="rust" aria-selected="true">Rust</button><button class="tab" role="tab" type="button" data-lang="text" aria-selected="false">Tabela</button></div><div class="tabpanel" role="tabpanel"><figure class="code"><figcaption><span class="lang">rs</span><span class="ttl">decodificar código SMD</span><button class="copy" type="button">Copiar</button></figcaption><pre><code class="language-rust">/// &quot;103&quot; → 10 000 Ω; &quot;4R7&quot; → 4,7 Ω (R marca a vírgula)
 fn codigo_smd(codigo: &amp;str) -&gt; Option&lt;f32&gt; {
+    if !codigo.is_ascii() || !codigo.bytes().all(|b| b.is_ascii_digit() || b == b&#x27;R&#x27;) { return None; }
     if codigo.contains(&#x27;R&#x27;) {
         return codigo.replacen(&#x27;R&#x27;, &quot;.&quot;, 1).parse().ok();
     }
@@ -929,7 +939,7 @@ meio e o GND: ele serve de &quot;reservatório&quot; e estabiliza a medida.</cod
 <p>Ligue um resistor conhecido (R_ref) no 3,3 V e o desconhecido (R_x) no GND. Medindo Vout, isole R_x na fórmula. Esse é o projeto 3, inteiro, em quatro linhas.</p>
 <div class="formula">Vout = Vin × Rx / (Rref + Rx) → Vout·Rref + Vout·Rx = Vin·Rx → <b>Rx = Rref × Vout / (Vin − Vout)</b></div>
 <div class="tabs"><div class="tablist" role="tablist"><button class="tab" role="tab" type="button" data-lang="rust" aria-selected="true">Rust</button><button class="tab" role="tab" type="button" data-lang="text" aria-selected="false">Por que Option</button></div><div class="tabpanel" role="tabpanel"><figure class="code"><figcaption><span class="lang">rs</span><span class="ttl">calc: resistência desconhecida</span><button class="copy" type="button">Copiar</button></figcaption><pre><code class="language-rust">pub fn resistencia_desconhecida(r_ref: f32, vin: f32, vout: f32) -&gt; Option&lt;f32&gt; {
-    if vout &lt;= 0.0 || vout &gt;= vin { None } else { Some(r_ref * vout / (vin - vout)) }
+    if !r_ref.is_finite() || r_ref &lt;= 0.0 || !vin.is_finite() || !vout.is_finite() || vout &lt;= 0.0 || vout &gt;= vin { None } else { Some(r_ref * vout / (vin - vout)) }
 }
 
 #[test]
@@ -953,7 +963,7 @@ Nos dois casos a divisão daria 0 ou infinito. Option obriga o firmware a tratar
 <h3>Exemplo 1 — Vermelho em 3,3 V: o caso confortável</h3>
 <p>Com Vf de 2,0 V, sobram 1,3 V para o resistor. Um pequeno erro de Vf (1,9 ou 2,1 V) muda pouco a corrente, porque a sobra é grande comparada ao erro. Na calculadora acima, com 10 mA o resultado é 130 Ω → 150 Ω comercial → ≈ 8,7 mA.</p>
 <div class="tabs"><div class="tablist" role="tablist"><button class="tab" role="tab" type="button" data-lang="rust" aria-selected="true">Rust</button><button class="tab" role="tab" type="button" data-lang="text" aria-selected="false">Bancada</button></div><div class="tabpanel" role="tabpanel"><figure class="code"><figcaption><span class="lang">rs</span><span class="ttl">calc: resistor do LED</span><button class="copy" type="button">Copiar</button></figcaption><pre><code class="language-rust">pub fn resistor_led(vcc: f32, vf: f32, corrente_a: f32) -&gt; Option&lt;f32&gt; {
-    if vcc &lt;= vf || corrente_a &lt;= 0.0 { None } else { Some((vcc - vf) / corrente_a) }
+    if !vcc.is_finite() || !vf.is_finite() || !corrente_a.is_finite() || vf &lt; 0.0 || vcc &lt;= vf || corrente_a &lt;= 0.0 { None } else { Some((vcc - vf) / corrente_a) }
 }
 
 #[test]
@@ -1076,9 +1086,13 @@ O PWM do capítulo 8 no gate vira um dimmer para a fita.</code></pre></figure></
 <h3>Exemplo 1 — Do número do ADC à tensão</h3>
 <div class="formula">V = leitura × Vfundo / (2ⁿ − 1) → 2048 × 2,5 / 4095 = <b>1,250 V</b> · degrau: 2,5 / 4095 = 0,61 mV</div>
 <div class="tabs"><div class="tablist" role="tablist"><button class="tab" role="tab" type="button" data-lang="rust" aria-selected="true">Rust</button><button class="tab" role="tab" type="button" data-lang="text" aria-selected="false">Calibração</button></div><div class="tabpanel" role="tabpanel"><figure class="code"><figcaption><span class="lang">rs</span><span class="ttl">calc: ADC</span><button class="copy" type="button">Copiar</button></figcaption><pre><code class="language-rust">pub fn adc_para_volts(leitura: u16, bits: u8, vref: f32) -&gt; f32 {
+    assert!((1..=16).contains(&amp;bits), &quot;ADC: use de 1 a 16 bits&quot;);
     leitura as f32 * vref / ((1u32 &lt;&lt; bits) - 1) as f32
 }
-pub fn resolucao_adc(bits: u8, vref: f32) -&gt; f32 { vref / ((1u32 &lt;&lt; bits) - 1) as f32 }
+pub fn resolucao_adc(bits: u8, vref: f32) -&gt; f32 {
+    assert!((1..=16).contains(&amp;bits), &quot;ADC: use de 1 a 16 bits&quot;);
+    vref / ((1u32 &lt;&lt; bits) - 1) as f32
+}
 
 #[test]
 fn meio_da_escala() {
@@ -1291,7 +1305,7 @@ impl Debounce {
     pub fn atualizar(&amp;mut self, nivel: bool, agora_ms: u64) -&gt; Option&lt;bool&gt; {
         if nivel == self.estavel { self.candidato_desde = None; return None; }
         let desde = *self.candidato_desde.get_or_insert(agora_ms);
-        if agora_ms - desde &gt;= self.janela_ms {
+        if agora_ms.saturating_sub(desde) &gt;= self.janela_ms {
             self.estavel = nivel;
             self.candidato_desde = None;
             Some(nivel)
@@ -1421,7 +1435,7 @@ fn main() -&gt; ! {
             match calc::resistencia_desconhecida(R_REF, VIN, v) {
                 Some(r) if r &lt; 1.0 =&gt; println!(&quot;curto-circuito?&quot;),
                 Some(r) =&gt; println!(&quot;V = {:.3} V   Rx = {:.0} ohm&quot;, v, r),
-                None =&gt; println!(&quot;sem resistor no GND&quot;),
+                None =&gt; println!(&quot;curto-circuito ou leitura inválida&quot;),
             }
         }
         esperar(1000);
@@ -1554,6 +1568,10 @@ ou um fade com start_duty_fade, que o próprio periférico executa.</code></pre>
 <h3>O cálculo, testado no PC</h3>
 <div class="tabs"><div class="tablist" role="tablist"><button class="tab" role="tab" type="button" data-lang="rust" aria-selected="true">Rust</button><button class="tab" role="tab" type="button" data-lang="python" aria-selected="false">Python</button></div><div class="tabpanel" role="tabpanel"><figure class="code"><figcaption><span class="lang">rs</span><span class="ttl">calc: equação Beta</span><button class="copy" type="button">Copiar</button></figcaption><pre><code class="language-rust">/// Termistor NTC pela equação Beta: 1/T = 1/T0 + ln(R/R0)/B, T em kelvin. Devolve °C.
 pub fn ntc_celsius(r_ntc: f32, r0: f32, t0_c: f32, beta: f32) -&gt; f32 {
+    if !r_ntc.is_finite() || r_ntc &lt;= 0.0 || !r0.is_finite() || r0 &lt;= 0.0
+        || !t0_c.is_finite() || t0_c &lt;= -273.15 || !beta.is_finite() || beta &lt;= 0.0 {
+        return f32::NAN;
+    }
     let t0_k = t0_c + 273.15;
     let inv_t = 1.0 / t0_k + libm_ln(r_ntc / r0) / beta;   // libm_ln: logaritmo sem std
     1.0 / inv_t - 273.15
@@ -1606,6 +1624,11 @@ fn main() -&gt; ! {
         for _ in 0..16 { soma += nb::block!(adc.read_oneshot(&amp;mut sensor)).unwrap() as u32; }
         let v = soma as f32 / 16.0 / 1000.0;
 
+        if v &lt;= 0.0 || v &gt;= 2.45 {
+            alarme.set_low(); ligado = false;
+            println!(&quot;sensor fora da faixa ({v:.3} V)&quot;);
+            esperar(1000); continue;
+        }
         // 1) tensão → resistência do NTC (ele está embaixo; o fixo, em cima)
         let Some(r_ntc) = calc::resistencia_desconhecida(R_FIXO, VCC, v) else {
             println!(&quot;sensor desconectado ({v:.3} V)&quot;);
@@ -1877,16 +1900,17 @@ async fn main() {
 &lt;body&gt;&lt;h1&gt;Temperaturas&lt;/h1&gt;&lt;svg id=&quot;g&quot; viewBox=&quot;0 0 800 300&quot;&gt;&lt;/svg&gt;&lt;p id=&quot;ult&quot;&gt;&lt;/p&gt;
 &lt;script&gt;
 const cores = [&#x27;#0B6B4D&#x27;, &#x27;#A0531A&#x27;, &#x27;#1565C0&#x27;, &#x27;#7B1FA2&#x27;];
+const esc = s =&gt; String(s).replace(/[&amp;&lt;&gt;&quot;]/g, c =&gt; ({&#x27;&amp;&#x27;:&#x27;&amp;amp;&#x27;, &#x27;&lt;&#x27;:&#x27;&amp;lt;&#x27;, &#x27;&gt;&#x27;:&#x27;&amp;gt;&#x27;, &#x27;&quot;&#x27;:&#x27;&amp;quot;&#x27;}[c]));
 async function desenhar() {
   const d = await (await fetch(&#x27;/api/leituras&#x27;)).json();
   if (!d.length) return;
   const t0 = d[0].ms, t1 = d[d.length - 1].ms || t0 + 1;
   const ts = d.map(x =&gt; x.temperatura), lo = Math.min(...ts) - 1, hi = Math.max(...ts) + 1;
   const X = ms =&gt; (ms - t0) / (t1 - t0 || 1) * 780 + 10, Y = t =&gt; 290 - (t - lo) / (hi - lo) * 280;
-  const porDisp = {}; d.forEach(x =&gt; (porDisp[x.dispositivo] ??= []).push(x));
+  const porDisp = Object.create(null); d.forEach(x =&gt; (porDisp[x.dispositivo] ??= []).push(x));
   document.getElementById(&#x27;g&#x27;).innerHTML = Object.entries(porDisp).map(([nome, l], i) =&gt;
     `&lt;path fill=&quot;none&quot; stroke=&quot;${cores[i % 4]}&quot; stroke-width=&quot;2&quot; d=&quot;${l.map((x, k) =&gt; (k ? &#x27;L&#x27; : &#x27;M&#x27;) + X(x.ms) + &#x27; &#x27; + Y(x.temperatura)).join(&#x27;&#x27;)}&quot;/&gt;` +
-    `&lt;text x=&quot;12&quot; y=&quot;${20 + 18 * i}&quot; fill=&quot;${cores[i % 4]}&quot;&gt;${nome}&lt;/text&gt;`).join(&#x27;&#x27;);
+    `&lt;text x=&quot;12&quot; y=&quot;${20 + 18 * i}&quot; fill=&quot;${cores[i % 4]}&quot;&gt;${esc(nome)}&lt;/text&gt;`).join(&#x27;&#x27;);
   const u = d[d.length - 1];
   document.getElementById(&#x27;ult&#x27;).textContent = `última: ${u.dispositivo} ${u.temperatura.toFixed(1)} °C`;
 }
@@ -2059,10 +2083,13 @@ Em sistemas de segurança, prefira levar as saídas a um estado seguro antes de 
 }
 
 #[derive(Debug, PartialEq)]
-pub enum Medida { Ohms(f32), Saturou, Curto }
+pub enum Medida { Ohms(f32), Saturou, Curto, Invalida }
 
 pub fn medir&lt;L: LeitorMv&gt;(adc: &amp;mut L, r_ref: f32, vin: f32, amostras: u32) -&gt; Medida {
-    let soma: u32 = (0..amostras).map(|_| adc.ler_mv() as u32).sum();
+    if amostras == 0 || !r_ref.is_finite() || r_ref &lt;= 0.0 || !vin.is_finite() || vin &lt;= 0.0 {
+        return Medida::Invalida;
+    }
+    let soma: u64 = (0..amostras).map(|_| u64::from(adc.ler_mv())).sum();
     let v = soma as f32 / amostras as f32 / 1000.0;
     if v &gt; 2.45 { return Medida::Saturou; }
     match resistencia_desconhecida(r_ref, vin, v) {
@@ -2157,13 +2184,16 @@ O workflow lê com ${{ secrets.WOKWI_CLI_TOKEN }}; o valor nunca aparece nos log
 pub struct Agenda { intervalo_ms: u64, proxima_ms: u64 }
 
 impl Agenda {
-    pub const fn new(intervalo_ms: u64) -&gt; Self { Self { intervalo_ms, proxima_ms: 0 } }
+    pub const fn new(intervalo_ms: u64) -&gt; Self {
+        assert!(intervalo_ms &gt; 0, &quot;o intervalo deve ser positivo&quot;);
+        Self { intervalo_ms, proxima_ms: 0 }
+    }
     pub fn deve_medir(&amp;mut self, agora_ms: u64) -&gt; bool {
         if agora_ms &lt; self.proxima_ms { return false; }
         let atraso = agora_ms - self.proxima_ms;
         // atraso pequeno: mira o horário previsto (não acumula); atraso grande: recomeça de agora
         let base = if atraso &lt; self.intervalo_ms { self.proxima_ms } else { agora_ms };
-        self.proxima_ms = base + self.intervalo_ms;
+        self.proxima_ms = base.saturating_add(self.intervalo_ms);
         true
     }
 }
@@ -2312,7 +2342,7 @@ APROVADA</code></pre></figure></div></div>
 <div class="box box-siglas"><div class="box-label">Siglas e termos difíceis</div><dl><dt>OTA</dt><dd>Over-The-Air, atualização pela rede.</dd><dt>Partição</dt><dd>região da flash com um papel (app, dados, controle do OTA).</dd><dt>Rollback</dt><dd>voltar automaticamente para a versão anterior se a nova falhar.</dd><dt>Secure Boot</dt><dd>o bootloader só executa firmware assinado com a sua chave.</dd><dt>Flash Encryption</dt><dd>o conteúdo da flash fica cifrado; ler o chip com uma ferramenta não revela o código.</dd><dt>eFuse</dt><dd>bits gravados uma única vez no chip; ligam as proteções de forma permanente.</dd><dt>Watchdog</dt><dd>temporizador que reinicia o chip se o firmware travar.</dd><dt>Telemetria</dt><dd>dados que o aparelho envia sobre a própria saúde (versão, reinícios, erros).</dd></dl></div>
 <figure class="diagram"><div class="plate"><svg class="dg" viewBox="0 0 760 250" role="img" aria-label="Fluxo de produção: CI gera imagem, release no GitHub, gravação na fábrica e OTA em campo">
 <defs><marker id="m-prod" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path class="arrow" d="M0 0L10 5L0 10z"/></marker></defs>
-<text class="t-title" x="20" y="26">Uma só imagem, gerada pelo CI, vai para a fábrica e para os aparelhos em campo</text>
+<text class="t-title" x="20" y="26">Uma versão gera dois artefatos: imagem completa para a fábrica e app para OTA</text>
 <rect class="box" x="20" y="54" width="140" height="70" rx="8"/><text class="t-name" x="32" y="78">Tag v1.3.0</text><text class="t-sm" x="32" y="98">no GitHub</text>
 <rect class="rs" x="190" y="54" width="160" height="70" rx="8"/><text class="t-name" x="202" y="78">CI de release</text><text class="t-sm" x="202" y="98">testa, compila, assina</text><text class="t-sm" x="202" y="114">gera .bin único</text>
 <rect class="okb" x="380" y="54" width="160" height="70" rx="8"/><text class="t-name" x="392" y="78">GitHub Release</text><text class="t-sm" x="392" y="98">firmware-v1.3.0.bin</text><text class="t-sm" x="392" y="114">+ SHA-256</text>
@@ -2324,10 +2354,11 @@ APROVADA</code></pre></figure></div></div>
 <path class="ln dash" d="M380 210H100V124" marker-end="url(#m-prod)"/><text class="t-sm" x="110" y="200">telemetria: versão, reinícios, erros</text>
 </svg></div><figcaption>Liberar aos poucos (5%, depois 50%, depois todos) limita o estrago de uma versão ruim que passou pelos testes.</figcaption></figure>
 <h3>Exemplo 1 — A versão dentro do firmware</h3>
-<div class="tabs"><div class="tablist" role="tablist"><button class="tab" role="tab" type="button" data-lang="rust" aria-selected="true">build.rs</button><button class="tab" role="tab" type="button" data-lang="rust" aria-selected="false">Firmware</button></div><div class="tabpanel" role="tabpanel"><figure class="code"><figcaption><span class="lang">rs</span><span class="ttl">build.rs</span><button class="copy" type="button">Copiar</button></figcaption><pre><code class="language-rust">// roda no PC antes de compilar o firmware: grava o hash do Git numa variável
+<div class="tabs"><div class="tablist" role="tablist"><button class="tab" role="tab" type="button" data-lang="rust" aria-selected="true">build.rs</button><button class="tab" role="tab" type="button" data-lang="rust" aria-selected="false">Firmware</button></div><div class="tabpanel" role="tabpanel"><figure class="code"><figcaption><span class="lang">rs</span><span class="ttl">build.rs (acrescente ao gerado)</span><button class="copy" type="button">Copiar</button></figcaption><pre><code class="language-rust">// Acrescente esta função ao build.rs gerado e chame registrar_git() no main existente.
+// Preserve as chamadas embuild e os argumentos de link do ESP-IDF.
 use std::process::Command;
 
-fn main() {
+fn registrar_git() {
     let hash = Command::new(&quot;git&quot;)
         .args([&quot;rev-parse&quot;, &quot;--short&quot;, &quot;HEAD&quot;])
         .output()
@@ -2337,7 +2368,18 @@ fn main() {
         .filter(|s| !s.is_empty())
         .unwrap_or_else(|| &quot;desconhecido&quot;.into());
     println!(&quot;cargo:rustc-env=GIT_HASH={hash}&quot;);
-    println!(&quot;cargo:rerun-if-changed=.git/HEAD&quot;);
+    // Em firmware/, .git normalmente fica na pasta pai. Também rastreia a ref da branch.
+    let branch = Command::new(&quot;git&quot;).args([&quot;symbolic-ref&quot;, &quot;-q&quot;, &quot;HEAD&quot;]).output().ok()
+        .filter(|s| s.status.success())
+        .map(|s| String::from_utf8_lossy(&amp;s.stdout).trim().to_string());
+    for alvo in [Some(&quot;HEAD&quot;), Some(&quot;packed-refs&quot;), branch.as_deref()].into_iter().flatten() {
+        if let Ok(saida) = Command::new(&quot;git&quot;).args([&quot;rev-parse&quot;, &quot;--git-path&quot;, alvo]).output() {
+            let caminho = String::from_utf8_lossy(&amp;saida.stdout);
+            if saida.status.success() &amp;&amp; std::path::Path::new(caminho.trim()).exists() {
+                println!(&quot;cargo:rerun-if-changed={}&quot;, caminho.trim());
+            }
+        }
+    }
 }</code></pre></figure></div><div class="tabpanel" role="tabpanel" hidden><figure class="code"><figcaption><span class="lang">rs</span><span class="ttl">no firmware</span><button class="copy" type="button">Copiar</button></figcaption><pre><code class="language-rust">const VERSAO: &amp;str = env!(&quot;CARGO_PKG_VERSION&quot;);   // vem do Cargo.toml
 const HASH: &amp;str = env!(&quot;GIT_HASH&quot;);              // vem do build.rs
 
@@ -2357,6 +2399,7 @@ espflash board-info | grep MAC &gt;&gt; lote.txt # registra o MAC: vira o númer
 espflash monitor | grep -m1 -E &quot;APROVADA|REPROVADA&quot;</code></pre></figure></div></div>
 <h3>Exemplo 3 — Atualização pela rede com volta automática</h3>
 <p>O esquema abaixo usa o firmware std do projeto 6. A tabela de partições reserva dois espaços de app; o novo firmware é escrito no que não está em uso.</p>
+<p>Para a fábrica, gere a imagem completa com <code>--merge</code>. Para este atualizador OTA, gere separadamente o binário da aplicação com <code>espflash save-image</code> sem <code>--merge</code>: bootloader e tabela de partições não devem ser enviados para a partição de app. O exemplo de release do capítulo 22 gera os dois arquivos.</p>
 <div class="tabs"><div class="tablist" role="tablist"><button class="tab" role="tab" type="button" data-lang="text" aria-selected="true">Partições</button><button class="tab" role="tab" type="button" data-lang="rust" aria-selected="false">Rust</button><button class="tab" role="tab" type="button" data-lang="text" aria-selected="false">Configuração</button></div><div class="tabpanel" role="tabpanel"><figure class="code"><figcaption><span class="lang">txt</span><span class="ttl">partitions.csv</span><button class="copy" type="button">Copiar</button></figcaption><pre><code class="language-text"># Nome,    Tipo, Subtipo, Offset,   Tamanho
 nvs,       data, nvs,     0x9000,   0x6000
 otadata,   data, ota,     0xf000,   0x2000
@@ -2365,7 +2408,8 @@ ota_0,     app,  ota_0,   0x20000,  0x1E0000
 ota_1,     app,  ota_1,   0x200000, 0x1E0000</code></pre></figure></div><div class="tabpanel" role="tabpanel" hidden><figure class="code"><figcaption><span class="lang">rs</span><span class="ttl">ota.rs (esquema com esp-idf-svc)</span><button class="copy" type="button">Copiar</button></figcaption><pre><code class="language-rust">use esp_idf_svc::io::Write;
 use esp_idf_svc::ota::EspOta;
 
-/// Escreve a nova versão na partição livre. `pedacos` vem de uma requisição HTTPS ao servidor de OTA.
+/// Escreve só o binário da aplicação na partição livre; não recebe a imagem --merge.
+/// `pedacos` vem de uma requisição HTTPS ao servidor de OTA.
 fn instalar(pedacos: impl Iterator&lt;Item = Vec&lt;u8&gt;&gt;) -&gt; anyhow::Result&lt;()&gt; {
     let mut ota = EspOta::new()?;
     let mut atualizacao = ota.initiate_update()?;
@@ -2443,13 +2487,18 @@ fn luhn(numero: &amp;str) -&gt; u32 {
 }
 
 fn serial(produto: &amp;str, ano: u32, semana: u32, sequencia: u32) -&gt; String {
+    assert!(!produto.is_empty() &amp;&amp; !produto.contains(&#x27;-&#x27;), &quot;produto inválido&quot;);
+    assert!((1..=53).contains(&amp;semana) &amp;&amp; sequencia &lt;= 99_999, &quot;semana ou sequência inválida&quot;);
     let base = format!(&quot;{:02}{:02}{:05}&quot;, ano % 100, semana, sequencia);
     format!(&quot;{produto}-{base}{}&quot;, luhn(&amp;base))
 }
 
 fn valido(s: &amp;str) -&gt; bool {
-    let Some((_, num)) = s.split_once(&#x27;-&#x27;) else { return false };
-    let (base, dv) = num.split_at(num.len() - 1);
+    let Some((produto, num)) = s.split_once(&#x27;-&#x27;) else { return false };
+    if produto.is_empty() || num.len() != 10 || !num.bytes().all(|b| b.is_ascii_digit()) {
+        return false;
+    }
+    let (base, dv) = num.split_at(9);
     dv.parse::&lt;u32&gt;().ok() == Some(luhn(base))
 }
 
@@ -2645,7 +2694,7 @@ jobs:
       - name: A tag bate com a versão do Cargo.toml?
         working-directory: firmware
         run: |
-          V=$(cargo metadata --no-deps --format-version 1 | jq -r &#x27;.packages[0].version&#x27;)
+          V=$(cargo metadata --no-deps --format-version 1 | jq -r &#x27;.packages[] | select(.name == &quot;termometro&quot;) | .version&#x27;)
           test &quot;v$V&quot; = &quot;$GITHUB_REF_NAME&quot; || { echo &quot;tag $GITHUB_REF_NAME, Cargo.toml v$V&quot;; exit 1; }
 
       - name: Testes da lógica
@@ -2656,13 +2705,17 @@ jobs:
           sudo apt-get update &amp;&amp; sudo apt-get install -y libudev-dev pkg-config
           cargo install espflash --locked
 
-      - name: Compilar e gerar a imagem única
+      - name: Compilar e gerar imagens para fábrica e OTA
         working-directory: firmware
         run: |
           cargo build --release
           espflash save-image --chip esp32c3 --merge \
             target/riscv32imc-unknown-none-elf/release/termometro \
             ../termometro-$GITHUB_REF_NAME.bin
+          # OTA recebe só a aplicação, sem --merge (bootloader e tabela ficam na placa).
+          espflash save-image --chip esp32c3 \
+            target/riscv32imc-unknown-none-elf/release/termometro \
+            ../termometro-ota-$GITHUB_REF_NAME.bin
 
       - run: sha256sum termometro-*.bin &gt; SHA256SUMS
 
@@ -2729,7 +2782,7 @@ pub fn potencia(tensao_v: f32, corrente_a: f32) -&gt; f32 {
 /// Resistor em série com um LED: R = (Vcc − Vf) / I.
 /// Devolve None se a fonte não tiver tensão suficiente para acender o LED.
 pub fn resistor_led(vcc: f32, vf: f32, corrente_a: f32) -&gt; Option&lt;f32&gt; {
-    if vcc &lt;= vf || corrente_a &lt;= 0.0 { None } else { Some((vcc - vf) / corrente_a) }
+    if !vcc.is_finite() || !vf.is_finite() || !corrente_a.is_finite() || vf &lt; 0.0 || vcc &lt;= vf || corrente_a &lt;= 0.0 { None } else { Some((vcc - vf) / corrente_a) }
 }
 
 /// Valores-base das séries comerciais (multiplicados por potências de 10).
@@ -2739,9 +2792,17 @@ pub const E24: [f32; 24] = [1.0, 1.1, 1.2, 1.3, 1.5, 1.6, 1.8, 2.0, 2.2, 2.4, 2.
 
 /// Menor valor comercial maior ou igual a `ohms` (arredondar para cima protege o LED).
 pub fn comercial_acima(ohms: f32, serie: &amp;[f32]) -&gt; f32 {
+    // Série crescente, com bases entre 1 (inclusive) e 10 (exclusive).
+    if !ohms.is_finite() || ohms &lt;= 0.0 || serie.is_empty()
+        || serie.iter().any(|b| !b.is_finite() || *b &lt; 1.0 || *b &gt;= 10.0)
+        || serie.windows(2).any(|p| p[0] &gt;= p[1]) { return f32::NAN; }
     let mut decada = 1.0_f32;
     while decada * 10.0 &lt;= ohms { decada *= 10.0; }
-    while decada &gt; ohms { decada /= 10.0; }
+    while decada &gt; ohms {
+        let menor = decada / 10.0;
+        if menor == 0.0 { return ohms; } // menor subnormal representável
+        decada = menor;
+    }
     for &amp;base in serie {
         let v = base * decada;
         if v &gt;= ohms * 0.9999 { return v; }
@@ -2760,19 +2821,27 @@ pub fn divisor(vin: f32, r1: f32, r2: f32) -&gt; f32 { vin * r2 / (r1 + r2) }
 
 /// Ohmímetro: R_x ligado ao terra, R_ref ligado ao Vin. R_x = R_ref × Vout / (Vin − Vout).
 pub fn resistencia_desconhecida(r_ref: f32, vin: f32, vout: f32) -&gt; Option&lt;f32&gt; {
-    if vout &lt;= 0.0 || vout &gt;= vin { None } else { Some(r_ref * vout / (vin - vout)) }
+    if !r_ref.is_finite() || r_ref &lt;= 0.0 || !vin.is_finite() || !vout.is_finite() || vout &lt;= 0.0 || vout &gt;= vin { None } else { Some(r_ref * vout / (vin - vout)) }
 }
 
 /// Converte a leitura bruta de um ADC linear em volts.
 pub fn adc_para_volts(leitura: u16, bits: u8, vref: f32) -&gt; f32 {
+    assert!((1..=16).contains(&amp;bits), &quot;ADC: use de 1 a 16 bits&quot;);
     leitura as f32 * vref / ((1u32 &lt;&lt; bits) - 1) as f32
 }
 
 /// Menor variação de tensão que o ADC enxerga (volts por degrau).
-pub fn resolucao_adc(bits: u8, vref: f32) -&gt; f32 { vref / ((1u32 &lt;&lt; bits) - 1) as f32 }
+pub fn resolucao_adc(bits: u8, vref: f32) -&gt; f32 {
+    assert!((1..=16).contains(&amp;bits), &quot;ADC: use de 1 a 16 bits&quot;);
+    vref / ((1u32 &lt;&lt; bits) - 1) as f32
+}
 
 /// Termistor NTC pela equação Beta: 1/T = 1/T0 + ln(R/R0)/B, com T em kelvin. Devolve °C.
 pub fn ntc_celsius(r_ntc: f32, r0: f32, t0_c: f32, beta: f32) -&gt; f32 {
+    if !r_ntc.is_finite() || r_ntc &lt;= 0.0 || !r0.is_finite() || r0 &lt;= 0.0
+        || !t0_c.is_finite() || t0_c &lt;= -273.15 || !beta.is_finite() || beta &lt;= 0.0 {
+        return f32::NAN;
+    }
     let t0_k = t0_c + 273.15;
     let inv_t = 1.0 / t0_k + libm_ln(r_ntc / r0) / beta;
     1.0 / inv_t - 273.15
@@ -2780,6 +2849,7 @@ pub fn ntc_celsius(r_ntc: f32, r0: f32, t0_c: f32, beta: f32) -&gt; f32 {
 
 /// Logaritmo natural sem std (série de atanh), suficiente para 0,01 &lt; x &lt; 100.
 fn libm_ln(x: f32) -&gt; f32 {
+    if !x.is_finite() || x &lt;= 0.0 { return f32::NAN; }
     // reduz x para perto de 1 usando ln(x) = k·ln(2) + ln(m)
     let (mut m, mut k) = (x, 0i32);
     while m &gt; 1.5 { m /= 2.0; k += 1; }
@@ -2798,9 +2868,14 @@ pub fn pwm_media(vcc: f32, duty: f32) -&gt; f32 { vcc * duty.clamp(0.0, 1.0) }
 pub fn tau_rc(r_ohm: f32, c_farad: f32) -&gt; f32 { r_ohm * c_farad }
 
 /// Tensão no capacitor carregando: Vc(t) = Vcc × (1 − e^(−t/τ)).
-pub fn carga_capacitor(vcc: f32, t_s: f32, tau_s: f32) -&gt; f32 { vcc * (1.0 - exp_aprox(-t_s / tau_s)) }
+pub fn carga_capacitor(vcc: f32, t_s: f32, tau_s: f32) -&gt; f32 {
+    if !t_s.is_finite() || t_s &lt; 0.0 || !tau_s.is_finite() || tau_s &lt;= 0.0 { return f32::NAN; }
+    vcc * (1.0 - exp_aprox(-t_s / tau_s))
+}
 
 fn exp_aprox(x: f32) -&gt; f32 {
+    // Usada só com x &lt;= 0 na carga RC; após 80τ o resíduo é desprezível.
+    if x &lt;= -80.0 { return 0.0; }
     // e^x = (e^(x/2^k))^(2^k), com série de Taylor no meio
     let k = 8;
     let y = x / (1 &lt;&lt; k) as f32;
@@ -2844,7 +2919,7 @@ impl Debounce {
     pub fn atualizar(&amp;mut self, nivel: bool, agora_ms: u64) -&gt; Option&lt;bool&gt; {
         if nivel == self.estavel { self.candidato_desde = None; return None; }
         let desde = *self.candidato_desde.get_or_insert(agora_ms);
-        if agora_ms - desde &gt;= self.janela_ms {
+        if agora_ms.saturating_sub(desde) &gt;= self.janela_ms {
             self.estavel = nivel;
             self.candidato_desde = None;
             Some(nivel)
@@ -2862,11 +2937,14 @@ pub trait LeitorMv { fn ler_mv(&amp;mut self) -&gt; u16; }
 
 /// Resultado do ohmímetro.
 #[derive(Debug, PartialEq)]
-pub enum Medida { Ohms(f32), Saturou, Curto }
+pub enum Medida { Ohms(f32), Saturou, Curto, Invalida }
 
 /// Média de `amostras` leituras e conversão em ohms (R_x embaixo, R_ref em cima).
 pub fn medir&lt;L: LeitorMv&gt;(adc: &amp;mut L, r_ref: f32, vin: f32, amostras: u32) -&gt; Medida {
-    let soma: u32 = (0..amostras).map(|_| adc.ler_mv() as u32).sum();
+    if amostras == 0 || !r_ref.is_finite() || r_ref &lt;= 0.0 || !vin.is_finite() || vin &lt;= 0.0 {
+        return Medida::Invalida;
+    }
+    let soma: u64 = (0..amostras).map(|_| u64::from(adc.ler_mv())).sum();
     let v = soma as f32 / amostras as f32 / 1000.0;
     if v &gt; 2.45 { return Medida::Saturou; }
     match resistencia_desconhecida(r_ref, vin, v) { Some(r) =&gt; Medida::Ohms(r), None =&gt; Medida::Curto }
@@ -2880,12 +2958,15 @@ impl&lt;F: FnMut() -&gt; u16&gt; LeitorMv for DeFuncao&lt;F&gt; { fn ler_mv(&amp
 pub struct Agenda { intervalo_ms: u64, proxima_ms: u64 }
 
 impl Agenda {
-    pub const fn new(intervalo_ms: u64) -&gt; Self { Self { intervalo_ms, proxima_ms: 0 } }
+    pub const fn new(intervalo_ms: u64) -&gt; Self {
+        assert!(intervalo_ms &gt; 0, &quot;o intervalo deve ser positivo&quot;);
+        Self { intervalo_ms, proxima_ms: 0 }
+    }
     pub fn deve_medir(&amp;mut self, agora_ms: u64) -&gt; bool {
         if agora_ms &lt; self.proxima_ms { return false; }
         let atraso = agora_ms - self.proxima_ms;
         let base = if atraso &lt; self.intervalo_ms { self.proxima_ms } else { agora_ms };
-        self.proxima_ms = base + self.intervalo_ms;
+        self.proxima_ms = base.saturating_add(self.intervalo_ms);
         true
     }
 }
@@ -3214,9 +3295,22 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
   "use strict";
   const $ = (s, r = document) => r.querySelector(s);
   const $$ = (s, r = document) => Array.from(r.querySelectorAll(s));
+  function storageWarning() {
+    const aviso = document.getElementById("storage-warning");
+    if (aviso) aviso.hidden = false;
+  }
   const store = {
-    get(k, d) { try { const v = localStorage.getItem("rsemb:" + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
-    set(k, v) { try { localStorage.setItem("rsemb:" + k, JSON.stringify(v)); } catch (e) { /* armazenamento indisponível */ } }
+    get(k, d) {
+      try {
+        const raw = localStorage.getItem("rsemb:" + k);
+        if (raw == null) return d;
+        const val = JSON.parse(raw);
+        if (Array.isArray(d)) return Array.isArray(val) ? val : d;
+        if (d && typeof d === "object") return val && typeof val === "object" && !Array.isArray(val) ? val : d;
+        return typeof val === typeof d ? val : d;
+      } catch (e) { storageWarning(); return d; }
+    },
+    set(k, val) { try { localStorage.setItem("rsemb:" + k, JSON.stringify(val)); } catch (e) { storageWarning(); } }
   };
   const esc = s => String(s).replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
   const norm = s => (s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -3255,8 +3349,8 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
 
   /* ---------------- tema */
   const root = document.documentElement;
-  const temaSalvo = store.get("tema", null);
-  if (temaSalvo) root.setAttribute("data-theme", temaSalvo);
+  const temaSalvo = store.get("tema", "");
+  if (["light", "dark"].includes(temaSalvo)) root.setAttribute("data-theme", temaSalvo);
   $("#theme-btn")?.addEventListener("click", () => {
     const atual = root.getAttribute("data-theme") || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
     const novo = atual === "dark" ? "light" : "dark";
@@ -3279,7 +3373,7 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
   });
 
   /* ---------------- progresso */
-  const done = store.get("done", {});
+  const done = Object.assign(Object.create(null), store.get("done", {}));
   function renderProgress() {
     const n = CHAPTERS.filter(s => done[s.id]).length;
     setTxt("prog-n", n); setTxt("top-prog", `${n} de ${CHAPTERS.length} estudados`);
@@ -3302,14 +3396,33 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
   }
 
   /* ---------------- abas (código e trilhas) */
+  function ativarAba(tb, idx) {
+    const tabs = $$(":scope > .tablist > .tab", tb);
+    tabs.forEach((t, i) => { t.setAttribute("aria-selected", String(i === idx)); t.tabIndex = i === idx ? 0 : -1; });
+    $$(":scope > .tabpanel", tb).forEach((p, i) => { p.hidden = i !== idx; });
+    const t = tabs[idx];
+    if (t.classList.contains("tab-pane")) store.set("trilha", t.textContent);
+    $$(":scope > .tabpanel", tb)[idx]?.querySelectorAll(".widget").forEach(w => w.dispatchEvent(new Event("input")));
+  }
+  $$(".tabs").forEach((tb, k) => {
+    const tabs = $$(":scope > .tablist > .tab", tb), panels = $$(":scope > .tabpanel", tb);
+    tabs.forEach((t, i) => {
+      t.id = `tab-${k}-${i}`; t.setAttribute("aria-controls", `panel-${k}-${i}`);
+      t.tabIndex = t.getAttribute("aria-selected") === "true" ? 0 : -1;
+      panels[i].id = `panel-${k}-${i}`; panels[i].setAttribute("aria-labelledby", t.id);
+    });
+  });
   document.addEventListener("click", e => {
     const t = e.target.closest(".tab"); if (!t) return;
-    const tb = t.closest(".tabs"), tabs = $$(":scope > .tablist > .tab", tb), idx = tabs.indexOf(t);
-    tabs.forEach((x, i) => x.setAttribute("aria-selected", String(i === idx)));
-    $$(":scope > .tabpanel", tb).forEach((p, i) => { p.hidden = i !== idx; });
-    if (t.classList.contains("tab-pane")) store.set("trilha", t.textContent);
-    /* widgets que estavam escondidos redesenham com a largura certa */
-    $$(":scope > .tabpanel", tb)[idx]?.querySelectorAll(".widget").forEach(w => w.dispatchEvent(new Event("input")));
+    const tb = t.closest(".tabs"); ativarAba(tb, $$(":scope > .tablist > .tab", tb).indexOf(t));
+  });
+  document.addEventListener("keydown", e => {
+    const t = e.target.closest(".tab");
+    if (!t || !["ArrowLeft", "ArrowRight", "Home", "End"].includes(e.key)) return;
+    e.preventDefault();
+    const tb = t.closest(".tabs"), tabs = $$(":scope > .tablist > .tab", tb), i = tabs.indexOf(t);
+    const n = e.key === "Home" ? 0 : e.key === "End" ? tabs.length - 1 : (i + (e.key === "ArrowRight" ? 1 : -1) + tabs.length) % tabs.length;
+    ativarAba(tb, n); tabs[n].focus();
   });
   let redimTimer = null, ultimaLargura = window.innerWidth;
   window.addEventListener("resize", () => {
@@ -3317,12 +3430,11 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
     ultimaLargura = window.innerWidth; clearTimeout(redimTimer);
     redimTimer = setTimeout(() => $$(".widget").forEach(w => { if (w.offsetParent !== null && w.querySelector("svg.chart")) w.dispatchEvent(new Event("input")); }), 200);
   });
-  const trilha = store.get("trilha", null);
+  const trilha = store.get("trilha", "");
   if (trilha) $$(".tabs.panes").forEach(tb => {
     const tabs = $$(":scope > .tablist > .tab", tb), alvo = tabs.findIndex(t => t.textContent === trilha);
     if (alvo < 0) return;
-    tabs.forEach((x, i) => x.setAttribute("aria-selected", String(i === alvo)));
-    $$(":scope > .tabpanel", tb).forEach((p, i) => { p.hidden = i !== alvo; });
+    ativarAba(tb, alvo);
   });
 
   /* ---------------- copiar código */
@@ -3369,6 +3481,7 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
   }
   document.addEventListener("mouseover", e => { const a = e.target.closest("a.gl"); if (a) showTip(a); });
   document.addEventListener("mouseout", e => { if (e.target.closest("a.gl")) tip.hidden = true; });
+  document.addEventListener("focusout", () => { tip.hidden = true; });
   document.addEventListener("focusin", e => { const a = e.target.closest("a.gl"); if (a) showTip(a); else tip.hidden = true; });
 
   /* ---------------- quizzes */
@@ -3381,7 +3494,8 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
   }
   $$(".quiz[data-quiz]").forEach(qz => {
     const id = qz.dataset.quiz, Z = DATA.quiz[id]; if (!Z) return;
-    const resp = store.get("quiz:" + id, {});
+    const resp = Object.fromEntries(Object.entries(store.get("quiz:" + id, {})).filter(([k, val]) =>
+      /^\d+$/.test(k) && Z.qs[k] && Number.isInteger(val) && val >= 0 && val < Z.qs[k].opts.length));
     qz.innerHTML = `<div class="quiz-head"><b>${esc(Z.title)}</b><span class="qscore"></span></div>` + Z.qs.map((q, i) => `<div class="q" data-k="${i}">${questionHTML(q)}</div>`).join("") + `<div class="w-actions"><button type="button" class="btn btn-sm qreset">Refazer o quiz</button></div>`;
     const placar = () => { const f = Object.keys(resp).length, c = Object.entries(resp).filter(([k, v]) => Z.qs[k]?.a === v).length; $(".qscore", qz).textContent = `${c} certas · ${f} de ${Z.qs.length} respondidas`; };
     Object.entries(resp).forEach(([k, v]) => { const box = $(`.q[data-k="${k}"]`, qz); if (box && Z.qs[k]) revelar(box, Z.qs[k], v); });
@@ -3399,6 +3513,7 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
     const ids = Object.keys(DATA.quiz);
     let ativos = new Set(store.get("treino:ativos", ids).filter(x => ids.includes(x))); if (!ativos.size) ativos = new Set(ids);
     let placar = store.get("treino:placar", { ok: 0, n: 0 }), atual = null;
+    if (!Number.isSafeInteger(placar.ok) || !Number.isSafeInteger(placar.n) || placar.ok < 0 || placar.n < placar.ok) placar = { ok: 0, n: 0 };
     const ct = $("#tr-chips");
     ct.innerHTML = ids.map(id => { const ch = $("#" + DATA.quiz[id].ch); return `<button type="button" class="chip" data-id="${id}" aria-pressed="${ativos.has(id)}">${esc(ch ? ch.dataset.title : id)}</button>`; }).join("");
     ct.addEventListener("click", e => { const b = e.target.closest(".chip"); if (!b) return; const id = b.dataset.id; if (ativos.has(id) && ativos.size > 1) ativos.delete(id); else ativos.add(id); $$(".chip", ct).forEach(x => x.setAttribute("aria-pressed", String(ativos.has(x.dataset.id)))); store.set("treino:ativos", [...ativos]); });
@@ -3432,8 +3547,15 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
   function montar(id, html, atualizar) {
     const w = document.getElementById(id); if (!w) return null;
     w.innerHTML = html;
-    w.addEventListener("input", atualizar); w.addEventListener("change", atualizar);
-    atualizar(); return w;
+    const erro = document.createElement("p"); erro.className = "w-note"; erro.hidden = true; erro.setAttribute("role", "status"); w.appendChild(erro);
+    const render = e => {
+      const invalido = $$("input[type=number]", w).some(el => !el.value.trim() || el.validity.badInput || el.validity.rangeUnderflow || el.validity.rangeOverflow || !Number.isFinite(+el.value));
+      erro.hidden = !invalido;
+      erro.textContent = invalido ? "Preencha os campos com números válidos dentro dos limites indicados." : "";
+      if (!invalido) atualizar(e);
+    };
+    w.addEventListener("input", render); w.addEventListener("change", render);
+    render(); return w;
   }
 
   /* gráfico de linhas em SVG; escalas lineares ou log, tudo pelas mesmas funções X/Y */
@@ -3458,9 +3580,11 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
       if (r.y != null && r.y >= o.y[0] && r.y <= o.y[1]) s += `<line class="${r.cls || "ref"}" x1="${m.l}" x2="${W - m.r}" y1="${Y(r.y)}" y2="${Y(r.y)}"/>` + (r.label ? `<text class="lbl" x="${W - m.r - 4}" y="${Y(r.y) - 5}" text-anchor="end">${esc(r.label)}</text>` : "");
       if (r.x != null && r.x >= o.x[0] && r.x <= o.x[1]) s += `<line class="${r.cls || "ref"}" y1="${m.t}" y2="${H - m.b}" x1="${X(r.x)}" x2="${X(r.x)}"/>` + (r.label ? `<text class="lbl" x="${X(r.x) + 5}" y="${m.t + 12}">${esc(r.label)}</text>` : "");
     });
+    const clip = `${svg.id}-clip`;
+    s += `<defs><clipPath id="${clip}"><rect x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}"/></clipPath></defs>`;
     (o.series || []).forEach(se => {
-      const pts = se.pts.filter(p => Number.isFinite(p[0]) && Number.isFinite(p[1]) && (!ly || p[1] > 0));
-      if (pts.length) s += `<path class="${se.cls || "ser-a"}" d="${pts.map((p, i) => (i ? "L" : "M") + cx(p[0]).toFixed(1) + " " + cy(p[1]).toFixed(1)).join("")}"/>`;
+      const pts = se.pts.filter(p => Number.isFinite(p[0]) && Number.isFinite(p[1]) && (!lx || p[0] > 0) && (!ly || p[1] > 0));
+      if (pts.length) s += `<path class="${se.cls || "ser-a"}" clip-path="url(#${clip})" d="${pts.map((p, i) => (i ? "L" : "M") + X(p[0]).toFixed(1) + " " + Y(p[1]).toFixed(1)).join("")}"/>`;
       if (se.label && pts.length) { const p = pts[pts.length - 1]; s += `<text class="lbl" x="${cx(p[0]) - 4}" y="${cy(p[1]) - 6}" text-anchor="end">${esc(se.label)}</text>`; }
     });
     (o.pts || []).forEach(p => { if (Number.isFinite(p.x) && Number.isFinite(p.y)) s += `<circle class="${p.cls || "pt"}" cx="${cx(p.x)}" cy="${cy(p.y)}" r="${p.r || 5.5}"/>` + (p.label ? `<text class="lbl" x="${cx(p.x) + 9}" y="${cy(p.y) - 8}">${esc(p.label)}</text>` : ""); });
@@ -3507,16 +3631,20 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
     svg.innerHTML = `<line x1="10" y1="60" x2="400" y2="60" stroke="#9AA0A6" stroke-width="5" stroke-linecap="round"/><rect x="100" y="28" width="210" height="64" rx="26" fill="#D9C7A3" stroke="#8C7A55" stroke-width="1.5"/>` +
       faixas.map((c, i) => `<rect x="${[132, 162, 192, 262][i]}" y="28" width="16" height="64" fill="${c}" stroke="rgba(0,0,0,.25)"/>`).join("");
   }
-  const wc = montar("w-cores", head("Código de cores", "decodificador") +
+  montar("w-cores", head("Código de cores", "decodificador") +
     `<p class="w-note">Escolha as faixas para ler o valor, ou digite um valor para descobrir as cores. Lê-se a partir da faixa mais perto da ponta; a faixa dourada ou prateada fica sempre do lado direito.</p>` +
     `<svg class="dg" id="cc-svg" viewBox="0 0 410 120" role="img" aria-label="Resistor com faixas coloridas" style="max-width:520px"></svg>` +
     `<div class="ctl-grid">${select("cc-1", "1ª faixa (1º dígito)", CORES.map(([n], i) => [i, `${i} · ${n}`]).slice(1), 4)}${select("cc-2", "2ª faixa (2º dígito)", CORES.map(([n], i) => [i, `${i} · ${n}`]), 7)}${select("cc-3", "3ª faixa (multiplicador)", MULT.map(([e, n]) => [e, `${n} · ×${e < 0 ? nf(Math.pow(10, e), -e) : Math.pow(10, e).toLocaleString("pt-BR")}`]), 2)}${select("cc-4", "4ª faixa (tolerância)", TOL.map(([t, n]) => [t, n]), 5)}${num("cc-val", "Ou digite o valor (Ω)", 4700, "any", 0.1)}</div>` +
     `<div class="stat-row" id="cc-st"></div>`, e => {
       if (e && e.target && e.target.id === "cc-val") {
-        const x = +$("#cc-val").value; if (!(x >= 0.1)) return;
+        const x = +$("#cc-val").value; if (!Number.isFinite(x) || x < 0.1 || x > 99e6) {
+          $("#cc-st").innerHTML = stat("Valor", "use de 0,1 Ω a 99 MΩ", "badv"); return;
+        }
         let exp = Math.floor(Math.log10(x)) - 1, dd = Math.round(x / Math.pow(10, exp));
         if (dd >= 100) { dd = Math.round(dd / 10); exp++; }
-        if (exp < -2 || exp > 6) return;
+        if (exp < -2 || exp > 6) {
+          $("#cc-st").innerHTML = stat("Valor", "use de 0,1 Ω a 99 MΩ", "badv"); return;
+        }
         $("#cc-1").value = Math.floor(dd / 10); $("#cc-2").value = dd % 10; $("#cc-3").value = exp;
       }
       const d1 = v("cc-1"), d2 = v("cc-2"), ex = v("cc-3"), tol = $("#cc-4").value, R = (d1 * 10 + d2) * Math.pow(10, ex);
@@ -3569,7 +3697,7 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
     });
 
   /* ---------- 5. Ohmímetro virtual (Projeto 3) */
-  const misterio = { r: 4700, revelado: false, seed: 3 }, omLog = [];
+  const misterio = { r: 4700, revelado: false }, omLog = [];
   const REFS = [1000, 4700, 10000, 47000, 100000];
   const om = montar("w-ohmimetro", head("Ohmímetro com a placa", "simulador do projeto 3") +
     `<p class="w-note">A placa mede a tensão no meio de um divisor feito com um resistor conhecido (R_ref, ligado ao 3,3 V) e o resistor misterioso (R_x, ligado ao GND), e calcula R_x. Tente ler as cores antes de revelar.</p>` +
@@ -3638,8 +3766,12 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
     `<div class="ctl-grid">${num("bt-cap", "Capacidade da bateria (mAh)", 2000, 100, 1)}${num("bt-ativo", "Corrente acordado (mA)", 80, 1)}${num("bt-tativo", "Tempo acordado por ciclo (s)", 2, 0.1)}${num("bt-sono", "Corrente dormindo (µA)", 10, 1)}${num("bt-per", "Intervalo entre medidas (s)", 600, 10, 1)}${range("bt-aprov", "Capacidade aproveitável", 50, 100, 5, 80)}</div>` +
     `<div class="stat-row" id="bt-st"></div>${chartBox("bt-ch", 260, "Carga da bateria ao longo dos dias")}${legenda([["var(--chart-a)", "com deep sleep"], ["var(--chart-b)", "sempre acordado"]])}<p class="w-note" id="bt-msg"></p>`,
     () => {
-      const cap = v("bt-cap"), ia = v("bt-ativo"), ta = v("bt-tativo"), is = v("bt-sono") / 1000, per = Math.max(v("bt-per"), ta + 0.1), ap = v("bt-aprov") / 100;
+      const cap = v("bt-cap"), ia = v("bt-ativo"), ta = v("bt-tativo"), is = v("bt-sono") / 1000, per = v("bt-per"), ap = v("bt-aprov") / 100;
       setTxt("bt-aprov-o", Math.round(ap * 100) + "%");
+      if (v("bt-per") < ta || cap <= 0 || ia <= 0) {
+        $("#bt-st").innerHTML = stat("Dados inválidos", "use corrente ativa positiva e período ≥ tempo acordado", "badv");
+        $("#bt-ch").innerHTML = ""; setTxt("bt-msg", "Corrija os valores para calcular a autonomia."); return;
+      }
       const media = (ia * ta + is * (per - ta)) / per, horas = cap * ap / media, horasAcordado = cap * ap / ia;
       $("#bt-st").innerHTML = stat("Corrente média", nf(media, media < 1 ? 3 : 1) + " mA") + stat("Autonomia", horas > 48 ? nf(horas / 24, 0) + " dias" : nf(horas, 1) + " h", "good") + stat("Sem dormir", nf(horasAcordado, 1) + " h", "badv") + stat("Gasto acordado / dormindo", `${Math.round(ia * ta / (media * per) * 100)}% / ${Math.round(is * (per - ta) / (media * per) * 100)}%`);
       const dias = Math.max(1, horas / 24 * 1.1);
@@ -3651,6 +3783,7 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
   /* ---------- 9. Termômetro NTC (Projeto 5) */
   const ntcR = (t, r0 = 10000, b = 3950) => r0 * Math.exp(b * (1 / (t + 273.15) - 1 / 298.15));
   const ntcT = (r, r0 = 10000, b = 3950) => 1 / (1 / 298.15 + Math.log(r / r0) / b) - 273.15;
+  let ntAlarme = false;
   montar("w-ntc", head("Termômetro com NTC", "simulador do projeto 5") +
     `<p class="w-note">O NTC é um resistor que diminui quando esquenta. Ligado em divisor com um resistor fixo de 10 kΩ, a tensão no meio vira temperatura pela equação Beta. Mude a temperatura da sala e veja cada etapa do cálculo que o firmware faz.</p>` +
     `<div class="ctl-grid">${range("nt-t", "Temperatura real", -10, 80, 0.5, 25)}${select("nt-b", "Beta do NTC (datasheet)", [[3950, "3950 (comum, igual ao Wokwi)"], [3435, "3435"], [4100, "4100"]], 3950)}${range("nt-al", "Alarme acima de", 20, 60, 1, 30)}</div>` +
@@ -3660,8 +3793,11 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
       setTxt("nt-t-o", nf(t, 1) + " °C"); setTxt("nt-al-o", al + " °C");
       const r = ntcR(t, 10000, b), vo = 3.3 * r / (10000 + r), raw = Math.min(4095, Math.round(vo / 2.5 * 4095)), mv = raw / 4095 * 2.5;
       const rm = 10000 * mv / (3.3 - mv), tm = raw >= 4095 ? NaN : ntcT(rm, 10000, b);
+      if (!Number.isFinite(tm)) ntAlarme = false;
+      else if (!ntAlarme && tm >= al) ntAlarme = true;
+      else if (ntAlarme && tm <= al - 1) ntAlarme = false;
       $("#nt-f").innerHTML = `1/T = 1/298,15 + ln(R/10 kΩ)/${b} → <b>${Number.isFinite(tm) ? nf(tm, 1) + " °C" : "fora da faixa"}</b>`;
-      $("#nt-st").innerHTML = stat("R do NTC", si(r, "Ω")) + stat("Tensão no pino", nf(vo, 3) + " V", vo > 2.5 ? "badv" : "") + stat("Leitura do ADC", raw.toLocaleString("pt-BR")) + stat("Temperatura calculada", Number.isFinite(tm) ? nf(tm, 1) + " °C" : "saturou", "good") + stat("Alarme", tm > al ? "LIGADO" : "desligado", tm > al ? "badv" : "");
+      $("#nt-st").innerHTML = stat("R do NTC", si(r, "Ω")) + stat("Tensão no pino", nf(vo, 3) + " V", vo > 2.5 ? "badv" : "") + stat("Leitura do ADC", raw.toLocaleString("pt-BR")) + stat("Temperatura calculada", Number.isFinite(tm) ? nf(tm, 1) + " °C" : "saturou", Number.isFinite(tm) ? "good" : "badv") + stat("Alarme", ntAlarme ? "LIGADO" : "desligado", ntAlarme ? "badv" : "");
       const pts = []; for (let x = -10; x <= 80; x += 1) pts.push([x, ntcR(x, 10000, b)]);
       grafico($("#nt-ch"), { logy: true, x: [-10, 80], y: [700, 60000], xt: ticks(-10, 80, 9), yt: [1000, 2000, 5000, 10000, 20000, 50000], yf: t => si(t, "Ω", 0), xl: "temperatura (°C)", series: [{ pts, cls: "ser-a" }], refs: [{ x: al, label: "alarme", cls: "thr" }], pts: [{ x: t, y: r, label: si(r, "Ω") }] });
     });
@@ -3742,7 +3878,7 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
   })();
 
   /* ---------- 10. Pisca-LED (Projeto 1) */
-  const pisca = { on: false, timer: null, log: [], n: 0 };
+  const pisca = { on: false, timer: null, log: [], n: 0, inicio: 0 };
   const wp = montar("w-pisca", head("Pisca-LED na placa virtual", "simulador do projeto 1") +
     `<p class="w-note">É o mesmo circuito do desenho acima: GPIO6 → resistor de 220 Ω → LED → GND. O monitor serial mostra o que o firmware imprimiria.</p>` +
     `<div class="ctl-grid">${range("pi-ms", "Tempo entre trocas", 50, 2000, 50, 500)}${select("pi-cor", "Cor do LED", LEDS, "2.0")}</div>` +
@@ -3766,14 +3902,15 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
   }
   function passoPisca() {
     pisca.on = !pisca.on; pisca.n++;
-    pisca.log.push(`[${(pisca.n * v("pi-ms") / 1000).toFixed(2)} s] LED ${pisca.on ? "ligado" : "desligado"}`); if (pisca.log.length > 40) pisca.log.shift();
+    pisca.log.push(`[${((performance.now() - pisca.inicio) / 1000).toFixed(2)} s] LED ${pisca.on ? "ligado" : "desligado"}`); if (pisca.log.length > 40) pisca.log.shift();
     $("#pi-log").textContent = "ESP-ROM:esp32c3\nCarregando firmware...\nPisca-LED pronto no GPIO6\n" + pisca.log.join("\n"); $("#pi-log").scrollTop = 1e6;
     desenhaPisca();
   }
   if (wp) {
     $("#pi-log").textContent = "Clique em \"Ligar a placa\" para iniciar o firmware.";
     $("#pi-play").addEventListener("click", () => {
-      if (pisca.timer) { clearInterval(pisca.timer); pisca.timer = null; $("#pi-play").textContent = "Ligar a placa"; return; }
+      if (pisca.timer) { clearInterval(pisca.timer); pisca.timer = null; pisca.on = false; desenhaPisca(); $("#pi-play").textContent = "Ligar a placa"; return; }
+      pisca.inicio = performance.now(); pisca.n = 0; pisca.log.length = 0;
       $("#pi-play").textContent = "Desligar a placa"; pisca.timer = setInterval(passoPisca, v("pi-ms")); passoPisca();
     });
     document.addEventListener("visibilitychange", () => { if (document.hidden && pisca.timer) $("#pi-play").click(); });
@@ -3786,7 +3923,7 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
     const n = 4 + Math.floor(Math.random() * 6);
     for (let k = 0; k < n; k++) { t += 0.15 + Math.random() * 0.7; nivel = nivel > 1 ? 0 : 3.3; pts.push([t, pts[pts.length - 1][1]], [t, nivel]); }
     if (nivel > 1) { t += 0.3; pts.push([t, 3.3], [t, 0]); }
-    pts.push([12, 0]); return pts;
+    pts.push([24, 0]); return pts;
   }
   montar("w-botao", head("O botão que \"trepida\"", "simulador do projeto 2") +
     `<p class="w-note">Ao apertar, o contato metálico quica e o pino vê várias quedas em poucos milissegundos. Sem filtro, o contador soma vários apertos. Com o tempo de debounce, o firmware só aceita a mudança depois que o sinal fica estável.</p>` +
@@ -3798,7 +3935,7 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
   /* mesmo algoritmo do firmware: só aceita a mudança se o pino ficar diferente por `db` ms seguidos */
   function debounce(pts, db) {
     let estavel = 3.3, cand = null, tc = 0, conta = 0, aceito = null;
-    for (let t = 0; t <= 12; t += 0.05) {
+    for (let t = 0; t <= 24; t += 0.05) {
       const r = nivel(pts, t);
       if (r !== estavel) {
         if (cand === null || cand !== r) { cand = r; tc = t; }
@@ -3812,7 +3949,7 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
     if (!bot.sinal) bot.sinal = geraTrepidacao();
     const db = v("bo-db"), quedas = contaQuedas(bot.sinal), d = debounce(bot.sinal, db);
     $("#bo-st").innerHTML = stat("Quedas neste aperto", quedas) + stat("Sem debounce conta", quedas, quedas > 1 ? "badv" : "") + stat(`Com ${nf(db, 1)} ms conta`, d.conta, d.conta === 1 ? "good" : "badv") + stat("Total sem / com filtro", `${bot.brutos} / ${bot.filtrados}`);
-    grafico($("#bo-ch"), { x: [0, 12], y: [-0.2, 3.8], h: 240, xt: ticks(0, 12, 12), xf: t => t + " ms", yt: [0, 3.3], yf: t => nf(t, 1) + " V", xl: "tempo",
+    grafico($("#bo-ch"), { x: [0, 24], y: [-0.2, 3.8], h: 240, xt: ticks(0, 24, 8), xf: t => t + " ms", yt: [0, 3.3], yf: t => nf(t, 1) + " V", xl: "tempo",
       areas: db > 0 && d.aceito !== null ? [{ x0: d.aceito - db, x1: d.aceito }] : [], series: [{ pts: bot.sinal, cls: "ser-a" }], refs: d.aceito !== null ? [{ x: d.aceito, label: "aperto aceito" }] : [] });
   }
   if ($("#bo-aperta")) {
@@ -3829,13 +3966,18 @@ cd firmware &amp;&amp; cargo deny check licenses advisories
       const unit = v("pr-bom") + v("pr-pcb") + v("pr-cx"), fixo = v("pr-fixo"), lote = Math.max(1, v("pr-lote")), imp = v("pr-imp") / 100, mkt = v("pr-mkt") / 100, mg = v("pr-mg") / 100;
       setTxt("pr-imp-o", nf(imp * 100, 1) + "%"); setTxt("pr-mkt-o", nf(mkt * 100, 1) + "%"); setTxt("pr-mg-o", Math.round(mg * 100) + "%");
       const custo = unit + fixo / lote, resto = 1 - imp - mkt - mg;
-      if (resto <= 0) { $("#pr-st").innerHTML = stat("Preço", "impossível", "badv"); setTxt("pr-msg", "Impostos, taxa e margem somam 100% ou mais do preço: reduza algum deles."); return; }
-      const preco = custo / resto, contrib = preco * (1 - imp - mkt) - unit, equil = Math.ceil(fixo / contrib);
-      $("#pr-st").innerHTML = stat("Custo variável", "R$ " + nf(unit)) + stat("Custo com fixos rateados", "R$ " + nf(custo)) + stat("Preço sugerido", "R$ " + nf(preco), "good") + stat("Sobra por unidade", "R$ " + nf(contrib)) + stat("Ponto de equilíbrio", equil.toLocaleString("pt-BR") + " un.");
+      if (resto <= 0) { $("#pr-st").innerHTML = stat("Preço", "impossível", "badv"); $("#pr-ch").innerHTML = ""; setTxt("pr-msg", "Impostos, taxa e margem somam 100% ou mais do preço: reduza algum deles."); return; }
+      if (custo <= 0) {
+        $("#pr-st").innerHTML = stat("Preço", "informe algum custo positivo", "badv");
+        $("#pr-ch").innerHTML = ""; setTxt("pr-msg", "Não há ponto de equilíbrio a calcular com todos os custos zerados."); return;
+      }
+      const preco = custo / resto, contrib = preco * (1 - imp - mkt) - unit;
+      const equil = contrib > 0 ? Math.ceil(fixo / contrib) : null;
+      $("#pr-st").innerHTML = stat("Custo variável", "R$ " + nf(unit)) + stat("Custo com fixos rateados", "R$ " + nf(custo)) + stat("Preço sugerido", "R$ " + nf(preco), "good") + stat("Sobra por unidade", "R$ " + nf(contrib)) + stat("Ponto de equilíbrio", equil === null ? "não alcançado" : equil.toLocaleString("pt-BR") + " un.");
       const pts = [[0, -fixo], [lote, lote * contrib - fixo]];
       const ymin = -fixo * 1.1, ymax = Math.max(lote * contrib - fixo, 100) * 1.15;
-      grafico($("#pr-ch"), { x: [0, lote], y: [ymin, ymax], m: { l: 70 }, xt: ticks(0, lote, 6), yt: ticks(ymin, ymax, 7), yf: t => t === 0 ? "0" : nf(t / 1000, Math.abs(t) < 10000 && t % 1000 ? 1 : 0) + " mil", xl: "unidades vendidas", yl: "lucro acumulado (R$)", series: [{ pts, cls: "ser-a" }], refs: [{ y: 0, cls: "thr2" }, { x: equil, label: "equilíbrio" }], pts: [{ x: equil, y: 0 }] });
-      setTxt("pr-msg", `Preço = custo ÷ (1 − impostos − taxa − margem) = R$ ${nf(custo)} ÷ ${nf(resto, 2)} = R$ ${nf(preco)}. Os custos fixos (certificação, ferramental, primeira rodada de testes) só se pagam depois de ${equil} unidades vendidas.`);
+      grafico($("#pr-ch"), { x: [0, lote], y: [ymin, ymax], m: { l: 70 }, xt: ticks(0, lote, 6), yt: ticks(ymin, ymax, 7), yf: t => t === 0 ? "0" : nf(t / 1000, Math.abs(t) < 10000 && t % 1000 ? 1 : 0) + " mil", xl: "unidades vendidas", yl: "lucro acumulado (R$)", series: [{ pts, cls: "ser-a" }], refs: [{ y: 0, cls: "thr2" }, ...(equil === null ? [] : [{ x: equil, label: "equilíbrio" }])], pts: equil === null ? [] : [{ x: equil, y: 0 }] });
+      setTxt("pr-msg", `Preço = custo ÷ (1 − impostos − taxa − margem) = R$ ${nf(custo)} ÷ ${nf(resto, 2)} = R$ ${nf(preco)}. Os custos fixos (certificação, ferramental, primeira rodada de testes) só se pagam ${equil === null ? "quando houver contribuição positiva por unidade" : "depois de " + equil + " unidades vendidas"}.`);
     });
 
   /* ---------- 13. Escolha da licença */
