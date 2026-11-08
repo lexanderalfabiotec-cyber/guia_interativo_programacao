@@ -1,6 +1,6 @@
 # Flutter com IA no bolso: Guia Interativo
 
-Este diretório contém o [guia-flutter-ia.html](guia-flutter-ia.html), um caderno interativo de Flutter, Dart e inteligência artificial para quem já programa em Python, Go ou C#.
+Este diretório contém o [laboratorio_flutter.html](laboratorio_flutter.html), um caderno interativo de Flutter, Dart e inteligência artificial para quem já programa em Python, Go ou C#.
 
 **Estado atual:** o módulo 0 está disponível, com ambiente, referências e uma seção prática de softmax e temperatura em Dart, Python e Go. Os módulos 1 a 13 contêm roteiros de conteúdo planejado. Ainda não há um aplicativo Flutter completo ou um backend de IA implementado neste diretório.
 
@@ -14,16 +14,16 @@ Na raiz do repositório:
 python3 -m http.server 8000 --bind 127.0.0.1
 ```
 
-Acesse [http://localhost:8000/guias/flutter/guia-flutter-ia.html](http://localhost:8000/guias/flutter/guia-flutter-ia.html).
+Acesse [http://localhost:8000/guias/flutter/laboratorio_flutter.html](http://localhost:8000/guias/flutter/laboratorio_flutter.html).
 
-Se iniciar o servidor dentro de `guias/flutter`, o endereço será [http://localhost:8000/guia-flutter-ia.html](http://localhost:8000/guia-flutter-ia.html).
+Se iniciar o servidor dentro de `guias/flutter`, o endereço será [http://localhost:8000/laboratorio_flutter.html](http://localhost:8000/laboratorio_flutter.html).
 
 ### Abertura direta
 
 Também é possível abrir o HTML pelo gerenciador de arquivos ou, no Linux, executar na raiz do repositório:
 
 ```bash
-xdg-open guias/flutter/guia-flutter-ia.html
+xdg-open guias/flutter/laboratorio_flutter.html
 ```
 
 Não é necessário instalar Flutter, Dart, Go ou dependências Python para ler o guia. Use um navegador atual, com suporte a CSS `light-dark()`; o JavaScript habilita as ferramentas interativas. O conteúdo e todos os exemplos permanecem visíveis quando o JavaScript está desabilitado.
@@ -104,19 +104,7 @@ Esse exemplo demonstra o cálculo e uma política de temperatura. O servidor pro
 
 ## Validação e manutenção
 
-O [relatório de validação](VALIDACAO.md) descreve os problemas corrigidos, os testes e suas limitações. O script [validar_guia.py](validar_guia.py) valida o HTML, as referências internas, duplicações de exemplos, saídas Python/Go e as interações no navegador.
-
-Com [uv](https://docs.astral.sh/uv/), Python 3.12+ e Chrome ou Chromium instalado, execute na raiz:
-
-```bash
-# Testa as funcionalidades essenciais com os recursos externos bloqueados.
-uv run guias/flutter/validar_guia.py
-
-# Inclui os diagramas renderizados, realce de código e exportação por Turndown.
-uv run guias/flutter/validar_guia.py --online
-```
-
-O `uv` instala as dependências do teste em seu próprio ambiente. Se o navegador estiver em outro caminho, defina `BROWSER_EXECUTABLE`. Go é usado quando disponível; a ausência é informada no resultado. A compilação do exemplo Dart deve ser feita separadamente com o SDK.
+Este diretório contém o HTML e este README. O relatório e o script de validação citados em versões anteriores não estão presentes nesta cópia do repositório. Para conferir alterações, abra o HTML pelo servidor local e verifique abas, quizzes, simulador, persistência e exportações no navegador.
 
 Ao editar o HTML, mantenha IDs únicos, links de glossário válidos, uma alternativa correta por quiz e saídas de exemplo coerentes com o código. Atualize a situação dos módulos nesta documentação quando novos capítulos forem implementados.
 

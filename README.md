@@ -8,14 +8,15 @@ Repositório de cadernos e laboratórios interativos focados no aprendizado prá
 
 | Guia | Arquivo Principal | Descrição | Documentação |
 | :--- | :--- | :--- | :--- |
-| **Laboratório Rust** | [`guias/rust/laboratorio-rust.html`](guias/rust/laboratorio-rust.html) | Caderno interativo com 35 capítulos: os 23 temas do Guia Completo de Rust na Parte A, integração com Python (PyO3/maturin), trading algorítmico, sistemas IoT embarcados e simuladores em tempo real. | [Guia de uso](guias/rust/README.md) |
-| **Flutter com IA no bolso** | [`guias/flutter/guia-flutter-ia.html`](guias/flutter/guia-flutter-ia.html) | Guia de Flutter, Dart e IA: módulo 0 disponível com softmax em Dart/Python/Go, demo de concorrência, quizzes e exportações; módulos 1 a 13 planejados. | [Guia de uso](guias/flutter/README.md) · [Validação](guias/flutter/VALIDACAO.md) |
+| **Laboratório Rust** | [`guias/rust/laboratorio_rust.html`](guias/rust/laboratorio_rust.html) | Caderno interativo com 35 capítulos: os 23 temas do Guia Completo de Rust na Parte A, integração com Python (PyO3/maturin), trading algorítmico, sistemas IoT embarcados e simuladores em tempo real. | [Guia de uso](guias/rust/README.md) |
+| **Flutter com IA no bolso** | [`guias/flutter/laboratorio_flutter.html`](guias/flutter/laboratorio_flutter.html) | Guia de Flutter, Dart e IA: módulo 0 disponível com softmax em Dart/Python/Go, demo de concorrência, quizzes e exportações; módulos 1 a 13 planejados. | [Guia de uso](guias/flutter/README.md) |
+| **Laboratório LeetCode** | [`guias/leet_code/laboratorio_leet_code.html`](guias/leet_code/laboratorio_leet_code.html) | 18 capítulos de algoritmos com 33 problemas, 99 soluções em Python/Rust/Go, seis simuladores, quizzes e treino de entrevista. | [Guia de uso](guias/leet_code/README.md) · [Validação](guias/leet_code/VALIDACAO.md) |
 
 ---
 
 ## 🚀 Como Visualizar os Guias
 
-Cada guia é uma aplicação web interativa independente, contida em um arquivo HTML. Não é necessário instalar Rust ou Flutter para visualizar o conteúdo.
+Cada guia é uma aplicação web interativa independente, contida em um arquivo HTML. Não é necessário instalar Rust, Flutter ou as linguagens dos exemplos para visualizar o conteúdo.
 
 ### Opção 1: Servidor Local HTTP (Recomendado)
 
@@ -30,8 +31,9 @@ python3 -m http.server 8000 --bind 127.0.0.1
 
 Abra o navegador no endereço:
 
-- **Rust:** [http://localhost:8000/guias/rust/laboratorio-rust.html](http://localhost:8000/guias/rust/laboratorio-rust.html)
-- **Flutter:** [http://localhost:8000/guias/flutter/guia-flutter-ia.html](http://localhost:8000/guias/flutter/guia-flutter-ia.html)
+- **Rust:** [http://localhost:8000/guias/rust/laboratorio_rust.html](http://localhost:8000/guias/rust/laboratorio_rust.html)
+- **Flutter:** [http://localhost:8000/guias/flutter/laboratorio_flutter.html](http://localhost:8000/guias/flutter/laboratorio_flutter.html)
+- **LeetCode:** [http://localhost:8000/guias/leet_code/laboratorio_leet_code.html](http://localhost:8000/guias/leet_code/laboratorio_leet_code.html)
 
 #### Com Node.js / npx
 ```bash
@@ -50,22 +52,22 @@ Você pode abrir o arquivo diretamente com o navegador padrão do seu sistema:
 
 #### No Linux
 ```bash
-xdg-open guias/rust/laboratorio-rust.html
+xdg-open guias/rust/laboratorio_rust.html
 ```
 
 #### No macOS
 ```bash
-open guias/rust/laboratorio-rust.html
+open guias/rust/laboratorio_rust.html
 ```
 
 #### No Windows (PowerShell)
 ```powershell
-Start-Process "guias\rust\laboratorio-rust.html"
+Start-Process "guias\rust\laboratorio_rust.html"
 ```
 
 Ou simplesmente dê duplo-clique no arquivo através do gerenciador de arquivos.
 
-Os comandos acima abrem o laboratório Rust. Para Flutter, use o caminho `guias/flutter/guia-flutter-ia.html`; consulte também as [instruções específicas do guia](guias/flutter/README.md).
+Os comandos acima abrem o laboratório Rust. Para Flutter, use `guias/flutter/laboratorio_flutter.html`; para LeetCode, use `guias/leet_code/laboratorio_leet_code.html`. Consulte as instruções específicas de [Flutter](guias/flutter/README.md) e [LeetCode](guias/leet_code/README.md).
 
 ---
 
@@ -116,19 +118,26 @@ maturin develop --release
 
 ---
 
-## 📱 Exemplos e Validação do Guia de Flutter
+## 📱 Exemplos do Guia de Flutter
 
 O módulo 0 contém exemplos executáveis de softmax e temperatura em Dart puro, Python com NumPy e Go. O HTML também oferece comparação entre thread principal e Web Worker, busca, glossário, tema, progresso, três quizzes, download de notebook e exportação Markdown/PDF.
 
-Veja os pré-requisitos e os comandos na [documentação de Flutter](guias/flutter/README.md). O [relatório de validação](guias/flutter/VALIDACAO.md) registra as correções e limitações. Para repetir os testes com `uv` e Chrome/Chromium instalado:
-
-```bash
-uv run guias/flutter/validar_guia.py
-```
+Veja os pré-requisitos e os comandos na [documentação de Flutter](guias/flutter/README.md).
 
 Os módulos 1 a 13 ainda são planejamentos, incluindo a criação do aplicativo Flutter e do proxy de IA em Go.
 
 ---
+
+## 🧩 Algoritmos e Entrevistas com LeetCode
+
+O laboratório reúne 18 capítulos e 33 problemas com soluções comparadas em Python, Rust e Go. Inclui seis simuladores (Big-O, janela deslizante, busca binária, ilhas por BFS, LCS e seleção de padrões), 54 perguntas, treino final e glossário com 49 termos. Os simuladores executam JavaScript; os exemplos das três linguagens são executados separadamente.
+
+Consulte a [documentação de LeetCode](guias/leet_code/README.md) para estudar e reproduzir os exemplos, e o [relatório de validação](guias/leet_code/VALIDACAO.md) para conhecer as correções e os limites da revisão. A validação local executa 304 casos nas três linguagens, incluindo uma árvore profunda em Python, e testa as interações no Chrome:
+
+```bash
+# Requer uv, Python 3.12+, Rust, Go e Chrome/Chromium.
+uv run guias/leet_code/validar_laboratorio.py
+```
 
 ## 🎯 Recursos do Laboratório Rust
 
@@ -142,12 +151,13 @@ Os módulos 1 a 13 ainda são planejamentos, incluindo a criação do aplicativo
 
 ## Onde o progresso fica salvo
 
-Os dois HTMLs salvam automaticamente no **`localStorage` do perfil do navegador**, no próprio computador. Os dados continuam disponíveis após fechar e reiniciar o navegador; nenhum arquivo de progresso é criado no projeto e nenhum dado é enviado a um servidor.
+Os três HTMLs salvam automaticamente no **`localStorage` do perfil do navegador**, no próprio computador. Os dados continuam disponíveis após fechar e reiniciar o navegador; nenhum arquivo de progresso é criado no projeto e nenhum dado é enviado a um servidor.
 
 | Guia | Chaves no `localStorage` |
 | :--- | :--- |
 | Rust | `labrs:done` (capítulos concluídos), `labrs:reading` (ponto da leitura), `labrs:quiz:<id>` (respostas), `labrs:treino:placar` e `labrs:treino:ativos` (treino), `labrs:tema` e `labrs:lang` (preferências) |
 | Flutter | `fia:done` (módulos concluídos), `fia:reading` (ponto da leitura), `fia:quiz:<id>` (respostas), `fia:theme` e `fia:lang` (preferências) |
+| LeetCode | `lablc:done` (capítulos concluídos), `lablc:reading` (ponto da leitura), `lablc:quiz:<id>` (respostas), `lablc:treino:placar` e `lablc:treino:ativos` (treino), `lablc:tema` e `lablc:lang` (preferências) |
 
 Ao reabrir o guia sem uma âncora (`#capitulo`) no endereço, ele retoma o ponto salvo. Links para um capítulo específico têm prioridade. As marcações e respostas são salvas imediatamente; a posição é salva durante a rolagem e ao sair da página.
 

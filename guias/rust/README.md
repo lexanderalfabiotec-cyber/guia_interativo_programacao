@@ -1,6 +1,6 @@
 # Laboratório Rust: Guia Interativo
 
-Este diretório contém o **Laboratório Rust** (`laboratorio-rust.html`), um caderno interativo completo projetado para desenvolvedores (especialmente com vivência em Python) aprenderem Rust de forma prática.
+Este diretório contém o **Laboratório Rust** (`laboratorio_rust.html`), um caderno interativo completo projetado para desenvolvedores (especialmente com vivência em Python) aprenderem Rust de forma prática.
 
 ---
 
@@ -8,19 +8,19 @@ Este diretório contém o **Laboratório Rust** (`laboratorio-rust.html`), um ca
 
 ### 1. Servidor Local (Método Recomendado)
 
-Na raiz do repositório ou neste diretório, execute:
+Dentro de `guias/rust`, execute:
 
 ```bash
 # Na pasta guias/rust:
 python3 -m http.server 8000
 ```
 Em seguida, acesse no navegador:
-**[http://localhost:8000/laboratorio-rust.html](http://localhost:8000/laboratorio-rust.html)**
+**[http://localhost:8000/laboratorio_rust.html](http://localhost:8000/laboratorio_rust.html)**
 
 ### 2. Abertura Direta
 
 ```bash
-xdg-open laboratorio-rust.html
+xdg-open laboratorio_rust.html
 ```
 *(ou abra o arquivo diretamente no navegador de sua preferência)*
 
@@ -32,7 +32,7 @@ Capítulos concluídos, respostas dos quizzes, placar do treino, tema e linguage
 
 Ao rolar para baixo até o final de um capítulo aparecer na tela, ele é marcado como concluído automaticamente. Você também pode marcar ou desmarcar a caixa "Já estudei este capítulo" manualmente.
 
-O guia está dividido em 6 partes e 35 capítulos práticos. A Parte A cobre todos os 23 temas do [Guia Completo de Rust](Guia%20Completo%20de%20Rust.md), com explicações descontraídas, exemplos, comparações com Python e quizzes. Os exemplos comparativos que já existiam continuam disponíveis em caixas expansíveis nos respectivos capítulos.
+O guia está dividido em 6 partes e 35 capítulos práticos. A Parte A cobre todos os 23 temas do Guia Completo de Rust, com explicações descontraídas, exemplos, comparações com Python e quizzes. Os exemplos comparativos que já existiam continuam disponíveis em caixas expansíveis nos respectivos capítulos.
 
 - **Parte A · Base da linguagem**
   - `01` Introdução: o que é Rust e como usar o guia
