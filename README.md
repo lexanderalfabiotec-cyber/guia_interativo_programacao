@@ -10,7 +10,8 @@ Repositório de cadernos e laboratórios interativos focados no aprendizado prá
 | :--- | :--- | :--- | :--- |
 | **Laboratório Rust** | [`guias/rust/laboratorio_rust.html`](guias/rust/laboratorio_rust.html) | Caderno interativo com 35 capítulos: os 23 temas do Guia Completo de Rust na Parte A, integração com Python (PyO3/maturin), trading algorítmico, sistemas IoT embarcados e simuladores em tempo real. | [Guia de uso](guias/rust/README.md) |
 | **Flutter com IA no bolso** | [`guias/flutter/laboratorio_flutter.html`](guias/flutter/laboratorio_flutter.html) | Guia de Flutter, Dart e IA: módulo 0 disponível com softmax em Dart/Python/Go, demo de concorrência, quizzes e exportações; módulos 1 a 13 planejados. | [Guia de uso](guias/flutter/README.md) |
-| **Laboratório LeetCode** | [`guias/leet_code/laboratorio_leet_code.html`](guias/leet_code/laboratorio_leet_code.html) | 18 capítulos de algoritmos com 33 problemas, 99 soluções em Python/Rust/Go, seis simuladores, quizzes e treino de entrevista. | [Guia de uso](guias/leet_code/README.md) · [Validação](guias/leet_code/VALIDACAO.md) |
+| **Laboratório LeetCode** | [`guias/leet_code/laboratorio_leet_code.html`](guias/leet_code/laboratorio_leet_code.html) | 18 capítulos de algoritmos com 33 problemas, 99 soluções em Python/Rust/Go, seis simuladores, quizzes e treino de entrevista. | [Guia de uso](guias/leet_code/README.md) |
+| **Laboratório Kotlin & Android** | [`guias/android_kotlin/laboratorio_kotlin_android.html`](guias/android_kotlin/laboratorio_kotlin_android.html) | 16 práticas com 32 novos programas Kotlin, diagramas, quizzes, simuladores e fragmentos de integração Android. | [Guia de uso](guias/android_kotlin/README.md) |
 
 ---
 
@@ -34,6 +35,7 @@ Abra o navegador no endereço:
 - **Rust:** [http://localhost:8000/guias/rust/laboratorio_rust.html](http://localhost:8000/guias/rust/laboratorio_rust.html)
 - **Flutter:** [http://localhost:8000/guias/flutter/laboratorio_flutter.html](http://localhost:8000/guias/flutter/laboratorio_flutter.html)
 - **LeetCode:** [http://localhost:8000/guias/leet_code/laboratorio_leet_code.html](http://localhost:8000/guias/leet_code/laboratorio_leet_code.html)
+- **Kotlin/Android:** [http://localhost:8000/guias/android_kotlin/laboratorio_kotlin_android.html](http://localhost:8000/guias/android_kotlin/laboratorio_kotlin_android.html)
 
 #### Com Node.js / npx
 ```bash
@@ -67,7 +69,7 @@ Start-Process "guias\rust\laboratorio_rust.html"
 
 Ou simplesmente dê duplo-clique no arquivo através do gerenciador de arquivos.
 
-Os comandos acima abrem o laboratório Rust. Para Flutter, use `guias/flutter/laboratorio_flutter.html`; para LeetCode, use `guias/leet_code/laboratorio_leet_code.html`. Consulte as instruções específicas de [Flutter](guias/flutter/README.md) e [LeetCode](guias/leet_code/README.md).
+Os comandos acima abrem o laboratório Rust. Para Flutter, use `guias/flutter/laboratorio_flutter.html`; para LeetCode, use `guias/leet_code/laboratorio_leet_code.html`. Para Kotlin/Android, use `guias/android_kotlin/laboratorio_kotlin_android.html`. Consulte as instruções específicas de [Flutter](guias/flutter/README.md), [LeetCode](guias/leet_code/README.md) e [Kotlin/Android](guias/android_kotlin/README.md).
 
 ---
 
@@ -132,11 +134,18 @@ Os módulos 1 a 13 ainda são planejamentos, incluindo a criação do aplicativo
 
 O laboratório reúne 18 capítulos e 33 problemas com soluções comparadas em Python, Rust e Go. Inclui seis simuladores (Big-O, janela deslizante, busca binária, ilhas por BFS, LCS e seleção de padrões), 54 perguntas, treino final e glossário com 49 termos. Os simuladores executam JavaScript; os exemplos das três linguagens são executados separadamente.
 
-Consulte a [documentação de LeetCode](guias/leet_code/README.md) para estudar e reproduzir os exemplos, e o [relatório de validação](guias/leet_code/VALIDACAO.md) para conhecer as correções e os limites da revisão. A validação local executa 304 casos nas três linguagens, incluindo uma árvore profunda em Python, e testa as interações no Chrome:
+Consulte a [documentação de LeetCode](guias/leet_code/README.md) para estudar e reproduzir os exemplos. O script e o relatório da revisão anterior não estão presentes nesta cópia do repositório.
+
+## 🤖 Kotlin, Android e IA
+
+O laboratório segue o formato do caderno Rust: resumo, conceitos, termos, exemplos, diagramas, pegadinhas e quizzes, com pausas de humor. São 16 práticas, 32 novos programas Kotlin/JVM, 16 diagramas SVG, 19 perguntas e quatro demonstrações em JavaScript. A seção 1.6 mantém os exemplos completos de feature engineering em Kotlin/Python e as comparações em C#/Go.
+
+Inclui fragmentos de Compose, ViewModel, Room, coroutines e Flow. Os roteiros de integração estão sinalizados; não há aplicativo Android completo. Tema, conclusões manuais, respostas dos quizzes e ponto de leitura são salvos no navegador. Veja a [documentação de Kotlin/Android](guias/android_kotlin/README.md).
+
+Com Python, beautifulsoup4, Playwright, Kotlin/JVM, Java e Chrome/Chromium instalados:
 
 ```bash
-# Requer uv, Python 3.12+, Rust, Go e Chrome/Chromium.
-uv run guias/leet_code/validar_laboratorio.py
+python3 guias/android_kotlin/validar_laboratorio.py
 ```
 
 ## 🎯 Recursos do Laboratório Rust
@@ -151,17 +160,20 @@ uv run guias/leet_code/validar_laboratorio.py
 
 ## Onde o progresso fica salvo
 
-Os três HTMLs salvam automaticamente no **`localStorage` do perfil do navegador**, no próprio computador. Os dados continuam disponíveis após fechar e reiniciar o navegador; nenhum arquivo de progresso é criado no projeto e nenhum dado é enviado a um servidor.
+Os quatro HTMLs salvam automaticamente no **`localStorage` do perfil do navegador**, no próprio computador. Os dados continuam disponíveis após fechar e reiniciar o navegador; nenhum arquivo de progresso é criado no projeto e nenhum dado é enviado a um servidor.
 
 | Guia | Chaves no `localStorage` |
 | :--- | :--- |
 | Rust | `labrs:done` (capítulos concluídos), `labrs:reading` (ponto da leitura), `labrs:quiz:<id>` (respostas), `labrs:treino:placar` e `labrs:treino:ativos` (treino), `labrs:tema` e `labrs:lang` (preferências) |
 | Flutter | `fia:done` (módulos concluídos), `fia:reading` (ponto da leitura), `fia:quiz:<id>` (respostas), `fia:theme` e `fia:lang` (preferências) |
 | LeetCode | `lablc:done` (capítulos concluídos), `lablc:reading` (ponto da leitura), `lablc:quiz:<id>` (respostas), `lablc:treino:placar` e `lablc:treino:ativos` (treino), `lablc:tema` e `lablc:lang` (preferências) |
+| Kotlin/Android | `kia:done` (conclusões manuais), `kia:reading` (leitura), `kia:quiz:<id>` (respostas), `kia:theme` e `kia:lang` (preferências) |
 
-Ao reabrir o guia sem uma âncora (`#capitulo`) no endereço, ele retoma o ponto salvo. Links para um capítulo específico têm prioridade. As marcações e respostas são salvas imediatamente; a posição é salva durante a rolagem e ao sair da página.
+Os quatro guias retomam a leitura ao reabrir sem uma âncora (`#capitulo`) no endereço, usando o ponto salvo. Links para um capítulo específico têm prioridade. As marcações e respostas são salvas imediatamente; a posição é salva durante a rolagem e ao sair da página.
 
-Ao rolar para baixo até o final de um capítulo ou módulo entrar na tela, ele é marcado automaticamente como concluído e salvo. As caixas de conclusão continuam disponíveis para marcar ou desmarcar manualmente. Abrir o guia no meio ou saltar para outro capítulo não conclui os anteriores automaticamente.
+Nos guias de Rust, Flutter e LeetCode, ao rolar para baixo até o final de um capítulo ou módulo entrar na tela, ele é marcado automaticamente como concluído e salvo. As caixas de conclusão continuam disponíveis para marcar ou desmarcar manualmente. Abrir o guia no meio ou saltar para outro capítulo não conclui os anteriores automaticamente.
+
+No laboratório Kotlin/Android, as conclusões continuam manuais; ponto de leitura e respostas dos quizzes também são persistidos.
 
 Para consultar os dados, abra as ferramentas do navegador (**F12 → Application/Aplicativo → Local Storage/Armazenamento local**) e selecione o endereço do guia.
 
